@@ -94,18 +94,18 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
     }
 
     @Override
-    public void create(PizzaInfoDTO pizza) {
+    public void create(PizzaInfoDTO pizzaInfo) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "INSERT INTO structure.pizza_info (pizza, size) VALUES (?, ?)");
 
-            preparedStatement.setLong(1, pizza.getPizzaId());
-            preparedStatement.setInt(2, pizza.getSize());
+            preparedStatement.setLong(1, pizzaInfo.getPizzaId());
+            preparedStatement.setInt(2, pizzaInfo.getSize());
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             if (e.getSQLState().equals("23503")) {
-                throw new FKNotFound("Pizza with id " + pizza.getPizzaId() + " does not exist");
+                throw new FKNotFound("Pizza with id " + pizzaInfo.getPizzaId() + " does not exist");
             }
 
             throw new RuntimeException("Something went wrong while creating Pizza");
@@ -113,19 +113,19 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
     }
 
     @Override
-    public void update(Long id, PizzaInfoDTO pizza) {
+    public void update(Long id, PizzaInfoDTO pizzaInfo) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "UPDATE structure.pizza_info SET pizza = ?, size = ? WHERE id = ?");
 
-            preparedStatement.setLong(1, pizza.getPizzaId());
-            preparedStatement.setInt(2, pizza.getSize());
+            preparedStatement.setLong(1, pizzaInfo.getPizzaId());
+            preparedStatement.setInt(2, pizzaInfo.getSize());
             preparedStatement.setLong(3, id);
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             if (e.getSQLState().equals("23503")) {
-                throw new FKNotFound("Pizza with id " + pizza.getPizzaId() + " does not exist");
+                throw new FKNotFound("Pizza with id " + pizzaInfo.getPizzaId() + " does not exist");
             }
 
             throw new RuntimeException("Something went wrong while updating Pizza");

@@ -34,15 +34,15 @@ public class PizzaInfoService implements IPizzaInfoService {
     }
 
     @Override
-    public void create(PizzaInfoDTO pizza) {
-        PizzaInfoValidator.validate(pizza);
-        pizzaInfoStorage.create(pizza);
+    public void create(PizzaInfoDTO pizzaInfo) {
+        PizzaInfoValidator.validate(pizzaInfo);
+        pizzaInfoStorage.create(pizzaInfo);
     }
 
     @Override
-    public void update(Long id, PizzaInfoDTO pizza) {
-        PizzaInfoValidator.validate(pizza);
-        pizzaInfoStorage.update(id, pizza);
+    public void update(Long id, PizzaInfoDTO pizzaInfo) {
+        PizzaInfoValidator.validate(pizzaInfo);
+        pizzaInfoStorage.update(id, pizzaInfo);
     }
 
     public static PizzaInfoService getInstance() {

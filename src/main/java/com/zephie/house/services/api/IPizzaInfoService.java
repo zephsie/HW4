@@ -5,7 +5,7 @@ import com.zephie.house.core.api.IPizzaInfo;
 
 public interface IPizzaInfoService extends IEssenceService<IPizzaInfo> {
 
-    void create(PizzaInfoDTO pizza);
+    void create(PizzaInfoDTO pizzaInfo);
 
-    void update(Long id, PizzaInfoDTO pizza);
+    void update(Long id, PizzaInfoDTO pizzaInfo);
 }
