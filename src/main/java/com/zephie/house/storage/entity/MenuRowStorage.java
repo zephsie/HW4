@@ -9,6 +9,7 @@ import com.zephie.house.storage.api.IMenuRowStorage;
 import com.zephie.house.util.DataSourceInitializer;
 import com.zephie.house.util.exceptions.FKNotFound;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,19 +20,15 @@ import java.util.Optional;
 
 public class MenuRowStorage implements IMenuRowStorage {
     private static volatile MenuRowStorage instance;
-    private final Connection connection;
+    private final DataSource dataSource;
 
     private MenuRowStorage() {
-        try {
-            connection = DataSourceInitializer.getDataSource().getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException("Something went wrong while connecting to DB");
-        }
+        dataSource = DataSourceInitializer.getDataSource();
     }
 
     @Override
     public Optional<IMenuRow> read(Long id) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "SELECT menu_row.id, pizza_info.id pizza_info_id, pizza.id pizza_id, name, description, size, price\n" +
                             "FROM structure.pizza_info\n" +
@@ -60,7 +57,7 @@ public class MenuRowStorage implements IMenuRowStorage {
 
     @Override
     public void delete(Long id) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM structure.menu_row WHERE id = ?");
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
@@ -71,7 +68,7 @@ public class MenuRowStorage implements IMenuRowStorage {
 
     @Override
     public Collection<IMenuRow> get() {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "SELECT menu_row.id, pizza_info.id pizza_info_id, pizza.id pizza_id, name, description, size, price\n" +
                             "FROM structure.pizza_info\n" +
@@ -99,7 +96,7 @@ public class MenuRowStorage implements IMenuRowStorage {
 
     @Override
     public void create(MenuRowDTO menuRow) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "INSERT INTO structure.menu_row (pizza_info, price) VALUES (?, ?)");
 
@@ -119,7 +116,7 @@ public class MenuRowStorage implements IMenuRowStorage {
 
     @Override
     public void update(Long id, MenuRowDTO menuRow) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "UPDATE structure.menu_row SET pizza_info = ?, price = ? WHERE id = ?");
 

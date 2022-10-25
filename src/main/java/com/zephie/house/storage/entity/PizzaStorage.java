@@ -7,6 +7,7 @@ import com.zephie.house.core.dto.PizzaDTO;
 import com.zephie.house.util.exceptions.NotUniqueException;
 import com.zephie.house.storage.api.IPizzaStorage;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,19 +19,16 @@ import java.util.Optional;
 public class PizzaStorage implements IPizzaStorage {
 
     private static volatile PizzaStorage instance;
-    private final Connection connection;
+
+    private final DataSource dataSource;
 
     private PizzaStorage() {
-        try {
-            connection = DataSourceInitializer.getDataSource().getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException("Something went wrong while connecting to DB");
-        }
+        dataSource = DataSourceInitializer.getDataSource();
     }
 
     @Override
     public Optional<IPizza> read(Long id) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, name, description FROM structure.pizza WHERE id = ?");
 
             preparedStatement.setLong(1, id);
@@ -49,7 +47,7 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public void create(PizzaDTO pizza) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO structure.pizza (name, description) VALUES (?, ?)");
 
             preparedStatement.setString(1, pizza.getName());
@@ -67,7 +65,7 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public Collection<IPizza> get() {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, name, description FROM structure.pizza");
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -86,7 +84,7 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public void update(Long id, PizzaDTO pizza) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("UPDATE structure.pizza SET name = ?, description = ? WHERE id = ?");
 
             preparedStatement.setString(1, pizza.getName());
@@ -105,7 +103,7 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public void delete(Long id) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM structure.pizza WHERE id = ?");
 
             preparedStatement.setLong(1, id);
@@ -118,7 +116,7 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public Optional<IPizza> read(String name) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, name, description FROM structure.pizza WHERE name = ?");
 
             preparedStatement.setString(1, name);
@@ -137,7 +135,7 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public void update(String name, PizzaDTO pizza) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("UPDATE structure.pizza SET name = ?, description = ? WHERE name = ?");
 
             preparedStatement.setString(1, pizza.getName());
@@ -156,7 +154,7 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public void delete(String name) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM structure.pizza WHERE name = ?");
 
             preparedStatement.setString(1, name);

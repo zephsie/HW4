@@ -8,6 +8,7 @@ import com.zephie.house.core.dto.PizzaInfoDTO;
 import com.zephie.house.storage.api.IPizzaInfoStorage;
 import com.zephie.house.util.exceptions.FKNotFound;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,24 +19,20 @@ import java.util.Optional;
 
 public class PizzaInfoStorage implements IPizzaInfoStorage {
     private static volatile PizzaInfoStorage instance;
-    private final Connection connection;
+    private final DataSource dataSource;
 
     private PizzaInfoStorage() {
-        try {
-            connection = DataSourceInitializer.getDataSource().getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException("Something went wrong while connecting to DB");
-        }
+        dataSource = DataSourceInitializer.getDataSource();
     }
 
     @Override
     public Optional<IPizzaInfo> read(Long id) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "SELECT pizza_info.id, pizza.id pizza_id, name, description, size\n" +
-                    "FROM structure.pizza_info\n" +
-                    "JOIN structure.pizza ON structure.pizza_info.pizza = structure.pizza.id\n" +
-                    "WHERE pizza_info.id = ?");
+                            "FROM structure.pizza_info\n" +
+                            "JOIN structure.pizza ON structure.pizza_info.pizza = structure.pizza.id\n" +
+                            "WHERE pizza_info.id = ?");
 
             preparedStatement.setLong(1, id);
 
@@ -57,7 +54,7 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     @Override
     public void delete(Long id) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM structure.pizza_info WHERE id = ?");
 
             preparedStatement.setLong(1, id);
@@ -70,11 +67,11 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     @Override
     public Collection<IPizzaInfo> get() {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "SELECT pizza_info.id, pizza.id pizza_id, name, description, size\n" +
-                    "FROM structure.pizza_info\n" +
-                    "JOIN structure.pizza ON structure.pizza_info.pizza = structure.pizza.id");
+                            "FROM structure.pizza_info\n" +
+                            "JOIN structure.pizza ON structure.pizza_info.pizza = structure.pizza.id");
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -95,7 +92,7 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     @Override
     public void create(PizzaInfoDTO pizzaInfo) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "INSERT INTO structure.pizza_info (pizza, size) VALUES (?, ?)");
 
@@ -114,7 +111,7 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     @Override
     public void update(Long id, PizzaInfoDTO pizzaInfo) {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     "UPDATE structure.pizza_info SET pizza = ?, size = ? WHERE id = ?");
 
