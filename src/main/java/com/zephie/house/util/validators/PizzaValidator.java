@@ -13,8 +13,16 @@ public class PizzaValidator {
             errors.add("Name is empty");
         }
 
+        if (pizza.getName().length() > 32) {
+            errors.add("Name is too long");
+        }
+
         if (pizza.getDescription() == null || pizza.getDescription().isBlank()) {
             errors.add("Description is empty");
+        }
+
+        if (pizza.getDescription().length() > 128) {
+            errors.add("Description is too long");
         }
 
         if (errors.size() > 0) {

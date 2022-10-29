@@ -1,12 +1,17 @@
 package com.zephie.house.services.entity;
 
-import com.zephie.house.storage.entity.PizzaStorage;
-import com.zephie.house.util.validators.PizzaValidator;
 import com.zephie.house.core.api.IPizza;
 import com.zephie.house.core.dto.PizzaDTO;
+import com.zephie.house.core.dto.SystemPizzaDTO;
 import com.zephie.house.services.api.IPizzaService;
 import com.zephie.house.storage.api.IPizzaStorage;
+import com.zephie.house.storage.entity.PizzaStorage;
+import com.zephie.house.util.exceptions.NotFoundException;
+import com.zephie.house.util.exceptions.NotUniqueException;
+import com.zephie.house.util.exceptions.WrongVersionException;
+import com.zephie.house.util.validators.PizzaValidator;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -21,63 +26,71 @@ public class PizzaService implements IPizzaService {
     }
 
     @Override
+    public IPizza create(PizzaDTO pizzaDTO) {
+        PizzaValidator.validate(pizzaDTO);
+
+        if (storage.read(pizzaDTO.getName()).isPresent()) {
+            throw new NotUniqueException("Pizza with name " + pizzaDTO.getName() + " already exists");
+        }
+
+        return storage.create(new SystemPizzaDTO(pizzaDTO.getName(),
+                pizzaDTO.getDescription(),
+                LocalDateTime.now(),
+                LocalDateTime.now()));
+    }
+
+    @Override
     public Optional<IPizza> read(Long id) {
         return storage.read(id);
     }
 
     @Override
-    public void create(PizzaDTO pizza) {
-        PizzaValidator.validate(pizza);
-        storage.create(pizza);
+    public Collection<IPizza> read() {
+        return storage.read();
     }
 
     @Override
-    public void update(Long id, PizzaDTO pizza) {
-        PizzaValidator.validate(pizza);
-        storage.update(id, pizza);
+    public IPizza update(Long id, PizzaDTO pizzaDTO, LocalDateTime dateUpdate) {
+        Optional<IPizza> optionalPizza = storage.read(id);
+
+        if (optionalPizza.isEmpty()) {
+            throw new NotFoundException("Pizza with id " + id + " not found");
+        }
+
+        Optional<IPizza> optionalPizzaByName = storage.read(pizzaDTO.getName());
+
+        if (optionalPizzaByName.isPresent() && !optionalPizzaByName.get().getId().equals(id)) {
+            throw new NotUniqueException("Pizza with name " + pizzaDTO.getName() + " already exists");
+        }
+
+        IPizza pizza = optionalPizza.get();
+
+        if (!pizza.getUpdateDate().equals(dateUpdate)) {
+            throw new WrongVersionException("Pizza with id " + id + " was updated");
+        }
+
+        return storage.update(id, new SystemPizzaDTO(pizzaDTO.getName(),
+                pizzaDTO.getDescription(),
+                pizza.getCreateDate(),
+                LocalDateTime.now()),
+                dateUpdate);
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id, LocalDateTime dateUpdate) {
+        Optional<IPizza> optionalPizza = storage.read(id);
+
+        if (optionalPizza.isEmpty()) {
+            throw new NotFoundException("Pizza with id " + id + " not found");
+        }
+
+        IPizza pizza = optionalPizza.get();
+
+        if (!pizza.getUpdateDate().equals(dateUpdate)) {
+            throw new WrongVersionException("Pizza with id " + id + " was updated");
+        }
+
         storage.delete(id);
-    }
-
-    @Override
-    public Collection<IPizza> get() {
-        try {
-            return storage.get();
-        } catch (Exception e) {
-            throw new RuntimeException("Error while getting Pizza");
-        }
-    }
-
-    @Override
-    public Optional<IPizza> read(String name) {
-        try {
-            return storage.read(name);
-        } catch (Exception e) {
-            throw new RuntimeException("Error while reading Pizza");
-        }
-    }
-
-    @Override
-    public void update(String name, PizzaDTO pizza) {
-        PizzaValidator.validate(pizza);
-
-        try {
-            storage.update(name, pizza);
-        } catch (Exception e) {
-            throw new RuntimeException("Error while updating Pizza");
-        }
-    }
-
-    @Override
-    public void delete(String name) {
-        try {
-            storage.delete(name);
-        } catch (Exception e) {
-            throw new RuntimeException("Error while deleting Pizza");
-        }
     }
 
     public static PizzaService getInstance() {

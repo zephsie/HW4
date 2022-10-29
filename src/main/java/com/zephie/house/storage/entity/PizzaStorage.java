@@ -1,17 +1,14 @@
 package com.zephie.house.storage.entity;
 
-import com.zephie.house.core.entity.Pizza;
-import com.zephie.house.util.DataSourceInitializer;
 import com.zephie.house.core.api.IPizza;
-import com.zephie.house.core.dto.PizzaDTO;
-import com.zephie.house.util.exceptions.NotUniqueException;
+import com.zephie.house.core.dto.SystemPizzaDTO;
 import com.zephie.house.storage.api.IPizzaStorage;
+import com.zephie.house.util.DataSourceInitializer;
+import com.zephie.house.util.mappers.ResultSetPizzaMapper;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -22,6 +19,13 @@ public class PizzaStorage implements IPizzaStorage {
 
     private final DataSource dataSource;
 
+    private static final String INSERT = "INSERT INTO structure.pizza (name, description, dt_create, dt_update) VALUES (?, ?, ?, ?)";
+    private static final String SELECT = "SELECT id, name, description, dt_create, dt_update FROM structure.pizza";
+    private static final String SELECT_BY_ID = "SELECT id, name, description, dt_create, dt_update FROM structure.pizza WHERE id = ?";
+    private static final String UPDATE = "UPDATE structure.pizza SET name = ?, description = ?, dt_update = ? WHERE id = ? AND dt_update = ?";
+    private static final String DELETE = "DELETE FROM structure.pizza WHERE id = ?";
+    private static final String SELECT_BY_NAME = "SELECT id, name, description, dt_create, dt_update FROM structure.pizza WHERE name = ?";
+
     private PizzaStorage() {
         dataSource = DataSourceInitializer.getDataSource();
     }
@@ -29,51 +33,29 @@ public class PizzaStorage implements IPizzaStorage {
     @Override
     public Optional<IPizza> read(Long id) {
         try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, name, description FROM structure.pizza WHERE id = ?");
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID);
 
             preparedStatement.setLong(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
-                return Optional.of(new Pizza(resultSet.getLong("id"), resultSet.getString("name"), resultSet.getString("description")));
-            }
+            return resultSet.next() ? Optional.of(ResultSetPizzaMapper.map(resultSet)) : Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Pizza");
         }
-
-        return Optional.empty();
     }
 
     @Override
-    public void create(PizzaDTO pizza) {
+    public Collection<IPizza> read() {
         try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO structure.pizza (name, description) VALUES (?, ?)");
-
-            preparedStatement.setString(1, pizza.getName());
-            preparedStatement.setString(2, pizza.getDescription());
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            if (e.getSQLState().equals("23505")) {
-                throw new NotUniqueException("Pizza with this name already exists");
-            }
-
-            throw new RuntimeException("Something went wrong while creating Pizza");
-        }
-    }
-
-    @Override
-    public Collection<IPizza> get() {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, name, description FROM structure.pizza");
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
             Collection<IPizza> pizzas = new ArrayList<>();
 
             while (resultSet.next()) {
-                pizzas.add(new Pizza(resultSet.getLong("id"), resultSet.getString("name"), resultSet.getString("description")));
+                pizzas.add(ResultSetPizzaMapper.map(resultSet));
             }
 
             return pizzas;
@@ -83,20 +65,43 @@ public class PizzaStorage implements IPizzaStorage {
     }
 
     @Override
-    public void update(Long id, PizzaDTO pizza) {
+    public IPizza create(SystemPizzaDTO systemPizzaDTO) {
         try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE structure.pizza SET name = ?, description = ? WHERE id = ?");
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
 
-            preparedStatement.setString(1, pizza.getName());
-            preparedStatement.setString(2, pizza.getDescription());
-            preparedStatement.setLong(3, id);
+            preparedStatement.setString(1, systemPizzaDTO.getName());
+            preparedStatement.setString(2, systemPizzaDTO.getDescription());
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(systemPizzaDTO.getCreateDate()));
+            preparedStatement.setTimestamp(4, Timestamp.valueOf(systemPizzaDTO.getUpdateDate()));
 
             preparedStatement.executeUpdate();
+
+            return read(systemPizzaDTO.getName()).orElseThrow(() -> new RuntimeException("Something went wrong while getting created pizza"));
         } catch (SQLException e) {
-            if (e.getSQLState().equals("23505")) {
-                throw new NotUniqueException("Pizza with this name already exists");
+            throw new RuntimeException("Something went wrong while creating Pizza");
+        }
+    }
+
+    @Override
+    public IPizza update(Long id, SystemPizzaDTO systemPizzaDTO, LocalDateTime updateDate) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
+
+            preparedStatement.setString(1, systemPizzaDTO.getName());
+            preparedStatement.setString(2, systemPizzaDTO.getDescription());
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(systemPizzaDTO.getUpdateDate()));
+
+            preparedStatement.setLong(4, id);
+            preparedStatement.setTimestamp(5, Timestamp.valueOf(updateDate));
+
+            int affectedRows = preparedStatement.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new RuntimeException("Pizza was not updated");
             }
 
+            return read(id).orElseThrow(() -> new RuntimeException("Something went wrong while getting updated pizza"));
+        } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while updating Pizza");
         }
     }
@@ -104,11 +109,15 @@ public class PizzaStorage implements IPizzaStorage {
     @Override
     public void delete(Long id) {
         try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM structure.pizza WHERE id = ?");
+            PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
 
             preparedStatement.setLong(1, id);
 
-            preparedStatement.executeUpdate();
+            int affectedRows = preparedStatement.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new RuntimeException("Pizza was not deleted");
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while deleting Pizza");
         }
@@ -117,51 +126,15 @@ public class PizzaStorage implements IPizzaStorage {
     @Override
     public Optional<IPizza> read(String name) {
         try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT id, name, description FROM structure.pizza WHERE name = ?");
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_NAME);
 
             preparedStatement.setString(1, name);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            if (resultSet.next()) {
-                return Optional.of(new Pizza(resultSet.getLong("id"), resultSet.getString("name"), resultSet.getString("description")));
-            }
+            return resultSet.next() ? Optional.of(ResultSetPizzaMapper.map(resultSet)) : Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Pizza");
-        }
-
-        return Optional.empty();
-    }
-
-    @Override
-    public void update(String name, PizzaDTO pizza) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE structure.pizza SET name = ?, description = ? WHERE name = ?");
-
-            preparedStatement.setString(1, pizza.getName());
-            preparedStatement.setString(2, pizza.getDescription());
-            preparedStatement.setString(3, name);
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            if (e.getSQLState().equals("23505")) {
-                throw new NotUniqueException("Pizza with this name already exists");
-            }
-
-            throw new RuntimeException("Something went wrong while updating Pizza");
-        }
-    }
-
-    @Override
-    public void delete(String name) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM structure.pizza WHERE name = ?");
-
-            preparedStatement.setString(1, name);
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Something went wrong while deleting Pizza");
         }
     }
 
