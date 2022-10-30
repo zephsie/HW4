@@ -13,5 +13,5 @@ public interface IEssenceStorage<T, DTO> {
 
     T update(Long id, DTO dto, LocalDateTime dateUpdate);
 
-    void delete(Long id);
+    void delete(Long id, LocalDateTime dateUpdate);
 }

@@ -51,6 +51,16 @@ public class PizzaService implements IPizzaService {
 
     @Override
     public IPizza update(Long id, PizzaDTO pizzaDTO, LocalDateTime dateUpdate) {
+        PizzaValidator.validate(pizzaDTO);
+
+        if (id == null) {
+            throw new IllegalArgumentException("Id cannot be null");
+        }
+
+        if (dateUpdate == null) {
+            throw new IllegalArgumentException("Date update cannot be null");
+        }
+
         Optional<IPizza> optionalPizza = storage.read(id);
 
         if (optionalPizza.isEmpty()) {
@@ -78,6 +88,14 @@ public class PizzaService implements IPizzaService {
 
     @Override
     public void delete(Long id, LocalDateTime dateUpdate) {
+        if (id == null) {
+            throw new IllegalArgumentException("Id cannot be null");
+        }
+
+        if (dateUpdate == null) {
+            throw new IllegalArgumentException("Date update cannot be null");
+        }
+
         Optional<IPizza> optionalPizza = storage.read(id);
 
         if (optionalPizza.isEmpty()) {
@@ -90,7 +108,7 @@ public class PizzaService implements IPizzaService {
             throw new WrongVersionException("Pizza with id " + id + " was updated");
         }
 
-        storage.delete(id);
+        storage.delete(id, dateUpdate);
     }
 
     public static PizzaService getInstance() {

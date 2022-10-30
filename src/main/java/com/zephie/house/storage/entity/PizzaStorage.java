@@ -4,7 +4,7 @@ import com.zephie.house.core.api.IPizza;
 import com.zephie.house.core.dto.SystemPizzaDTO;
 import com.zephie.house.storage.api.IPizzaStorage;
 import com.zephie.house.util.DataSourceInitializer;
-import com.zephie.house.util.mappers.ResultSetPizzaMapper;
+import com.zephie.house.util.mappers.ResultSetToPizzaMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -23,7 +23,7 @@ public class PizzaStorage implements IPizzaStorage {
     private static final String SELECT = "SELECT id, name, description, dt_create, dt_update FROM structure.pizza";
     private static final String SELECT_BY_ID = "SELECT id, name, description, dt_create, dt_update FROM structure.pizza WHERE id = ?";
     private static final String UPDATE = "UPDATE structure.pizza SET name = ?, description = ?, dt_update = ? WHERE id = ? AND dt_update = ?";
-    private static final String DELETE = "DELETE FROM structure.pizza WHERE id = ?";
+    private static final String DELETE = "DELETE FROM structure.pizza WHERE id = ? AND dt_update = ?";
     private static final String SELECT_BY_NAME = "SELECT id, name, description, dt_create, dt_update FROM structure.pizza WHERE name = ?";
 
     private PizzaStorage() {
@@ -39,7 +39,7 @@ public class PizzaStorage implements IPizzaStorage {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            return resultSet.next() ? Optional.of(ResultSetPizzaMapper.map(resultSet)) : Optional.empty();
+            return resultSet.next() ? Optional.of(ResultSetToPizzaMapper.map(resultSet)) : Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Pizza");
         }
@@ -55,7 +55,7 @@ public class PizzaStorage implements IPizzaStorage {
             Collection<IPizza> pizzas = new ArrayList<>();
 
             while (resultSet.next()) {
-                pizzas.add(ResultSetPizzaMapper.map(resultSet));
+                pizzas.add(ResultSetToPizzaMapper.map(resultSet));
             }
 
             return pizzas;
@@ -67,7 +67,7 @@ public class PizzaStorage implements IPizzaStorage {
     @Override
     public IPizza create(SystemPizzaDTO systemPizzaDTO) {
         try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS);
 
             preparedStatement.setString(1, systemPizzaDTO.getName());
             preparedStatement.setString(2, systemPizzaDTO.getDescription());
@@ -76,7 +76,13 @@ public class PizzaStorage implements IPizzaStorage {
 
             preparedStatement.executeUpdate();
 
-            return read(systemPizzaDTO.getName()).orElseThrow(() -> new RuntimeException("Something went wrong while getting created pizza"));
+            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return read(generatedKeys.getLong(1)).orElseThrow(() -> new RuntimeException("Something went wrong while reading created Pizza"));
+                } else {
+                    throw new RuntimeException("Something went wrong while creating Pizza");
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while creating Pizza");
         }
@@ -100,18 +106,19 @@ public class PizzaStorage implements IPizzaStorage {
                 throw new RuntimeException("Pizza was not updated");
             }
 
-            return read(id).orElseThrow(() -> new RuntimeException("Something went wrong while getting updated pizza"));
+            return read(id).orElseThrow(() -> new RuntimeException("Something went wrong while getting updated Pizza"));
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while updating Pizza");
         }
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id, LocalDateTime updateDate) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
 
             preparedStatement.setLong(1, id);
+            preparedStatement.setTimestamp(2, Timestamp.valueOf(updateDate));
 
             int affectedRows = preparedStatement.executeUpdate();
 
@@ -132,7 +139,7 @@ public class PizzaStorage implements IPizzaStorage {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            return resultSet.next() ? Optional.of(ResultSetPizzaMapper.map(resultSet)) : Optional.empty();
+            return resultSet.next() ? Optional.of(ResultSetToPizzaMapper.map(resultSet)) : Optional.empty();
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Pizza");
         }

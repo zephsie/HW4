@@ -7,22 +7,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PizzaValidator {
-    public static void validate(PizzaDTO pizza) {
+    public static void validate(PizzaDTO pizzaDTO) {
         List<String> errors = new ArrayList<>();
-        if (pizza.getName() == null || pizza.getName().isBlank()) {
-            errors.add("Name is empty");
-        }
 
-        if (pizza.getName().length() > 32) {
-            errors.add("Name is too long");
-        }
+        if (pizzaDTO == null) {
+            errors.add("PizzaDTO is null");
+        } else {
+            if (pizzaDTO.getName() == null || pizzaDTO.getName().isBlank()) {
+                errors.add("Name is empty");
+            }
 
-        if (pizza.getDescription() == null || pizza.getDescription().isBlank()) {
-            errors.add("Description is empty");
-        }
+            if (pizzaDTO.getName().length() > 32) {
+                errors.add("Name is too long");
+            }
 
-        if (pizza.getDescription().length() > 128) {
-            errors.add("Description is too long");
+            if (pizzaDTO.getDescription() == null || pizzaDTO.getDescription().isBlank()) {
+                errors.add("Description is empty");
+            }
+
+            if (pizzaDTO.getDescription().length() > 128) {
+                errors.add("Description is too long");
+            }
         }
 
         if (errors.size() > 0) {

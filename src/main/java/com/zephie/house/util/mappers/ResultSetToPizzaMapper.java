@@ -6,7 +6,7 @@ import com.zephie.house.core.entity.Pizza;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class ResultSetPizzaMapper {
+public class ResultSetToPizzaMapper {
     public static IPizza map(ResultSet resultSet) throws SQLException {
         return new Pizza(
             resultSet.getLong("id"),

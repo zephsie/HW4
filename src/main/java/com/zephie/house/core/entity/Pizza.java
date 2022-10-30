@@ -30,46 +30,56 @@ public class Pizza implements IPizza {
         this.updateDate = updateDate;
     }
 
+    @Override
     public Long getId() {
         return id;
     }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
 
+    @Override
     public void setDescription(String description) {
         this.description = description;
     }
 
+    @Override
     @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
     @JsonDeserialize(using = CustomLocalDateTimeDesSerializer.class)
     public LocalDateTime getCreateDate() {
         return createDate;
     }
 
+    @Override
     public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate;
     }
 
+    @Override
     @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
     @JsonDeserialize(using = CustomLocalDateTimeDesSerializer.class)
     public LocalDateTime getUpdateDate() {
         return updateDate;
     }
 
+    @Override
     public void setUpdateDate(LocalDateTime updateDate) {
         this.updateDate = updateDate;
     }
