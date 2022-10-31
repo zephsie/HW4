@@ -1,35 +1,46 @@
 package com.zephie.house.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.zephie.house.core.api.IPizza;
+import com.zephie.house.core.api.IMenu;
+import com.zephie.house.core.api.IMenuRow;
 import com.zephie.house.util.json.CustomLocalDateTimeDesSerializer;
 import com.zephie.house.util.json.CustomLocalDateTimeSerializer;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
-public class Pizza implements IPizza {
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class Menu implements IMenu {
     private Long id;
 
     private String name;
 
-    private String description;
+    private Boolean active;
+
+    private Set<IMenuRow> rows;
 
     private LocalDateTime createDate;
 
     private LocalDateTime updateDate;
 
-    public Pizza() {
+    public Menu() {
+        rows = new HashSet<>();
     }
 
-    public Pizza(Long id, String name, String description, LocalDateTime createDate, LocalDateTime updateDate) {
+    public Menu(Long id, String name, Boolean active, LocalDateTime createDate, LocalDateTime updateDate) {
         this.id = id;
         this.name = name;
-        this.description = description;
+        this.active = active;
         this.createDate = createDate;
         this.updateDate = updateDate;
+        rows = new HashSet<>();
     }
+
 
     @Override
     public Long getId() {
@@ -52,13 +63,23 @@ public class Pizza implements IPizza {
     }
 
     @Override
-    public String getDescription() {
-        return description;
+    public Boolean getActive() {
+        return active;
     }
 
     @Override
-    public void setDescription(String description) {
-        this.description = description;
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    @Override
+    public Set<IMenuRow> getRows() {
+        return rows;
+    }
+
+    @Override
+    public void setRows(Set<IMenuRow> rows) {
+        this.rows = rows;
     }
 
     @Override
@@ -87,10 +108,11 @@ public class Pizza implements IPizza {
 
     @Override
     public String toString() {
-        return "Pizza{" +
+        return "Menu{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
+                ", active=" + active +
+                ", rows=" + rows +
                 ", createDate=" + createDate +
                 ", updateDate=" + updateDate +
                 '}';
@@ -101,9 +123,9 @@ public class Pizza implements IPizza {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Pizza pizza = (Pizza) o;
+        Menu menu = (Menu) o;
 
-        return Objects.equals(id, pizza.id);
+        return Objects.equals(id, menu.id);
     }
 
     @Override

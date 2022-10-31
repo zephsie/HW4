@@ -9,8 +9,8 @@ import com.zephie.house.util.mappers.ResultSetToPizzaInfoMapper;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 
 public class PizzaInfoStorage implements IPizzaInfoStorage {
@@ -19,11 +19,11 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     private static final String INSERT = "INSERT INTO structure.pizza_info (pizza_id, size, dt_create, dt_update) VALUES (?, ?, ?, ?)";
 
-    private static final String SELECT = "SELECT pizza_info.id, pizza_id, name, description, pizza.dt_create pizza_dt_create, pizza.dt_update pizza_dt_update, size, pizza_info.dt_create, pizza_info.dt_update\n" +
+    private static final String SELECT = "SELECT pizza_info.id pizza_info_id, pizza_id, name pizza_name, size pizza_info_size\n" +
             "\tFROM structure.pizza_info\n" +
             "\tJOIN structure.pizza ON pizza_id = pizza.id";
 
-    private static final String SELECT_BY_ID = "SELECT pizza_info.id, pizza_id, name, description, pizza.dt_create pizza_dt_create, pizza.dt_update pizza_dt_update, size, pizza_info.dt_create, pizza_info.dt_update\n" +
+    private static final String SELECT_BY_ID = "SELECT pizza_info.id pizza_info_id, pizza_id, name pizza_name, size pizza_info_size, pizza_info.dt_create, pizza_info.dt_update\n" +
             "\tFROM structure.pizza_info\n" +
             "\tJOIN structure.pizza ON pizza_id = pizza.id\n" +
             "\tWHERE pizza_info.id = ?";
@@ -38,8 +38,7 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     @Override
     public IPizzaInfo create(SystemPizzaInfoDTO systemPizzaInfoDTO) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT, PreparedStatement.RETURN_GENERATED_KEYS);
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(INSERT, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setLong(1, systemPizzaInfoDTO.getPizzaId());
             preparedStatement.setInt(2, systemPizzaInfoDTO.getSize());
@@ -62,14 +61,13 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     @Override
     public Optional<IPizzaInfo> read(Long id) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID);
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID)) {
 
             preparedStatement.setLong(1, id);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            return resultSet.next() ? Optional.of(ResultSetToPizzaInfoMapper.map(resultSet)) : Optional.empty();
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next() ? Optional.of(ResultSetToPizzaInfoMapper.fullMap(resultSet)) : Optional.empty();
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading PizzaInfo");
         }
@@ -77,18 +75,17 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     @Override
     public Collection<IPizzaInfo> read() {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT);
+        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
 
-            ResultSet resultSet = preparedStatement.executeQuery();
+            try (ResultSet resultSet = statement.executeQuery(SELECT)) {
+                Collection<IPizzaInfo> pizzaInfos = new HashSet<>();
 
-            Collection<IPizzaInfo> pizzaInfos = new ArrayList<>();
+                while (resultSet.next()) {
+                    pizzaInfos.add(ResultSetToPizzaInfoMapper.partialMap(resultSet));
+                }
 
-            while (resultSet.next()) {
-                pizzaInfos.add(ResultSetToPizzaInfoMapper.map(resultSet));
+                return pizzaInfos;
             }
-
-            return pizzaInfos;
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading PizzaInfo");
         }
@@ -96,8 +93,7 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     @Override
     public IPizzaInfo update(Long id, SystemPizzaInfoDTO systemPizzaInfoDTO, LocalDateTime dateUpdate) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(UPDATE)) {
 
             preparedStatement.setLong(1, systemPizzaInfoDTO.getPizzaId());
             preparedStatement.setInt(2, systemPizzaInfoDTO.getSize());
@@ -120,8 +116,7 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     @Override
     public void delete(Long id, LocalDateTime dateUpdate) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(DELETE)) {
 
             preparedStatement.setLong(1, id);
             preparedStatement.setObject(2, dateUpdate);

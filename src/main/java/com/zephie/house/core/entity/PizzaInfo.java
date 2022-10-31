@@ -3,30 +3,32 @@ package com.zephie.house.core.entity;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.zephie.house.core.api.IPizza;
+import com.zephie.house.core.api.IPizzaInfo;
 import com.zephie.house.util.json.CustomLocalDateTimeDesSerializer;
 import com.zephie.house.util.json.CustomLocalDateTimeSerializer;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class Pizza implements IPizza {
+public class PizzaInfo implements IPizzaInfo {
+
     private Long id;
 
-    private String name;
+    private IPizza pizza;
 
-    private String description;
+    private int size;
 
     private LocalDateTime createDate;
 
     private LocalDateTime updateDate;
 
-    public Pizza() {
+    public PizzaInfo() {
     }
 
-    public Pizza(Long id, String name, String description, LocalDateTime createDate, LocalDateTime updateDate) {
+    public PizzaInfo(Long id, IPizza pizza, int size, LocalDateTime createDate, LocalDateTime updateDate) {
         this.id = id;
-        this.name = name;
-        this.description = description;
+        this.pizza = pizza;
+        this.size = size;
         this.createDate = createDate;
         this.updateDate = updateDate;
     }
@@ -42,23 +44,23 @@ public class Pizza implements IPizza {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public IPizza getPizza() {
+        return pizza;
     }
 
     @Override
-    public void setName(String name) {
-        this.name = name;
+    public void setPizza(IPizza pizza) {
+        this.pizza = pizza;
     }
 
     @Override
-    public String getDescription() {
-        return description;
+    public int getSize() {
+        return size;
     }
 
     @Override
-    public void setDescription(String description) {
-        this.description = description;
+    public void setSize(int size) {
+        this.size = size;
     }
 
     @Override
@@ -87,10 +89,10 @@ public class Pizza implements IPizza {
 
     @Override
     public String toString() {
-        return "Pizza{" +
+        return "PizzaInfo{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
+                ", pizza=" + pizza +
+                ", size=" + size +
                 ", createDate=" + createDate +
                 ", updateDate=" + updateDate +
                 '}';
@@ -101,9 +103,9 @@ public class Pizza implements IPizza {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Pizza pizza = (Pizza) o;
+        PizzaInfo pizzaInfo = (PizzaInfo) o;
 
-        return Objects.equals(id, pizza.id);
+        return Objects.equals(id, pizzaInfo.id);
     }
 
     @Override

@@ -1,32 +1,40 @@
 package com.zephie.house.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.zephie.house.core.api.IPizza;
+import com.zephie.house.core.api.IMenu;
+import com.zephie.house.core.api.IMenuRow;
+import com.zephie.house.core.api.IPizzaInfo;
 import com.zephie.house.util.json.CustomLocalDateTimeDesSerializer;
 import com.zephie.house.util.json.CustomLocalDateTimeSerializer;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class Pizza implements IPizza {
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+public class MenuRow implements IMenuRow {
     private Long id;
 
-    private String name;
+    private IPizzaInfo pizzaInfo;
 
-    private String description;
+    private IMenu menu;
+
+    private double price;
 
     private LocalDateTime createDate;
 
     private LocalDateTime updateDate;
 
-    public Pizza() {
+    public MenuRow() {
     }
 
-    public Pizza(Long id, String name, String description, LocalDateTime createDate, LocalDateTime updateDate) {
+    public MenuRow(Long id, IPizzaInfo pizzaInfo, IMenu menu, double price, LocalDateTime createDate, LocalDateTime updateDate) {
         this.id = id;
-        this.name = name;
-        this.description = description;
+        this.pizzaInfo = pizzaInfo;
+        this.menu = menu;
+        this.price = price;
         this.createDate = createDate;
         this.updateDate = updateDate;
     }
@@ -42,23 +50,33 @@ public class Pizza implements IPizza {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public IPizzaInfo getPizzaInfo() {
+        return pizzaInfo;
     }
 
     @Override
-    public void setName(String name) {
-        this.name = name;
+    public void setPizzaInfo(IPizzaInfo pizzaInfo) {
+        this.pizzaInfo = pizzaInfo;
     }
 
     @Override
-    public String getDescription() {
-        return description;
+    public IMenu getMenu() {
+        return menu;
     }
 
     @Override
-    public void setDescription(String description) {
-        this.description = description;
+    public void setMenu(IMenu menu) {
+        this.menu = menu;
+    }
+
+    @Override
+    public double getPrice() {
+        return price;
+    }
+
+    @Override
+    public void setPrice(double price) {
+        this.price = price;
     }
 
     @Override
@@ -87,10 +105,10 @@ public class Pizza implements IPizza {
 
     @Override
     public String toString() {
-        return "Pizza{" +
+        return "MenuRow{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
+                ", pizzaInfo=" + pizzaInfo +
+                ", menu=" + menu +
                 ", createDate=" + createDate +
                 ", updateDate=" + updateDate +
                 '}';
@@ -101,9 +119,9 @@ public class Pizza implements IPizza {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Pizza pizza = (Pizza) o;
+        MenuRow menuRow = (MenuRow) o;
 
-        return Objects.equals(id, pizza.id);
+        return Objects.equals(id, menuRow.id);
     }
 
     @Override

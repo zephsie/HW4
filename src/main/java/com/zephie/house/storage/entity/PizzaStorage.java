@@ -20,8 +20,8 @@ public class PizzaStorage implements IPizzaStorage {
     private final DataSource dataSource;
 
     private static final String INSERT = "INSERT INTO structure.pizza (name, description, dt_create, dt_update) VALUES (?, ?, ?, ?)";
-    private static final String SELECT = "SELECT id, name, description, dt_create, dt_update FROM structure.pizza";
-    private static final String SELECT_BY_ID = "SELECT id, name, description, dt_create, dt_update FROM structure.pizza WHERE id = ?";
+    private static final String SELECT = "SELECT id pizza_id, name pizza_name FROM structure.pizza";
+    private static final String SELECT_BY_ID = "SELECT id pizza_id, name pizza_name, description pizza_description, dt_create, dt_update FROM structure.pizza WHERE id = ?";
     private static final String UPDATE = "UPDATE structure.pizza SET name = ?, description = ?, dt_update = ? WHERE id = ? AND dt_update = ?";
     private static final String DELETE = "DELETE FROM structure.pizza WHERE id = ? AND dt_update = ?";
     private static final String SELECT_BY_NAME = "SELECT id, name, description, dt_create, dt_update FROM structure.pizza WHERE name = ?";
@@ -32,14 +32,13 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public Optional<IPizza> read(Long id) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID);
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_ID)) {
 
             preparedStatement.setLong(1, id);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            return resultSet.next() ? Optional.of(ResultSetToPizzaMapper.map(resultSet)) : Optional.empty();
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next() ? Optional.of(ResultSetToPizzaMapper.fullMap(resultSet)) : Optional.empty();
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Pizza");
         }
@@ -47,18 +46,17 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public Collection<IPizza> read() {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT);
+        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
 
-            ResultSet resultSet = preparedStatement.executeQuery();
+            try (ResultSet resultSet = statement.executeQuery(SELECT)) {
+                Collection<IPizza> pizzas = new ArrayList<>();
 
-            Collection<IPizza> pizzas = new ArrayList<>();
+                while (resultSet.next()) {
+                    pizzas.add(ResultSetToPizzaMapper.partialMap(resultSet));
+                }
 
-            while (resultSet.next()) {
-                pizzas.add(ResultSetToPizzaMapper.map(resultSet));
+                return pizzas;
             }
-
-            return pizzas;
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while getting Pizza");
         }
@@ -66,8 +64,7 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public IPizza create(SystemPizzaDTO systemPizzaDTO) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS);
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setString(1, systemPizzaDTO.getName());
             preparedStatement.setString(2, systemPizzaDTO.getDescription());
@@ -90,8 +87,7 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public IPizza update(Long id, SystemPizzaDTO systemPizzaDTO, LocalDateTime updateDate) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(UPDATE)) {
 
             preparedStatement.setString(1, systemPizzaDTO.getName());
             preparedStatement.setString(2, systemPizzaDTO.getDescription());
@@ -114,8 +110,7 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public void delete(Long id, LocalDateTime updateDate) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(DELETE)) {
 
             preparedStatement.setLong(1, id);
             preparedStatement.setTimestamp(2, Timestamp.valueOf(updateDate));
@@ -132,14 +127,13 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public Optional<IPizza> read(String name) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_NAME);
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_NAME)) {
 
             preparedStatement.setString(1, name);
 
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            return resultSet.next() ? Optional.of(ResultSetToPizzaMapper.map(resultSet)) : Optional.empty();
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next() ? Optional.of(ResultSetToPizzaMapper.fullMap(resultSet)) : Optional.empty();
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Pizza");
         }
