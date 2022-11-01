@@ -9,7 +9,7 @@ public class MenuRowValidator {
     public static void validate(MenuRowDTO menuRowDTO) {
         List<String> errors = new ArrayList<>();
 
-        if (menuRowDTO.getPrice() < 0) {
+        if (menuRowDTO.getPrice() <= 0) {
             errors.add("Price cannot be negative");
         }
 

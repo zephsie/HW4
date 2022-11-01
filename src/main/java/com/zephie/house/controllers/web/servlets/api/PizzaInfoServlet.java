@@ -3,7 +3,7 @@ package com.zephie.house.controllers.web.servlets.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zephie.house.core.dto.PizzaInfoDTO;
 import com.zephie.house.services.api.IPizzaInfoService;
-import com.zephie.house.services.entity.PizzaInfoService;
+import com.zephie.house.services.singleton.PizzaInfoServiceSingleton;
 import com.zephie.house.util.exceptions.FKNotFound;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.ValidationException;
@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 
 @WebServlet(name = "PizzaInfoServlet", urlPatterns = "/pizza_info")
 public class PizzaInfoServlet extends HttpServlet {
-    private final IPizzaInfoService pizzaInfoService = PizzaInfoService.getInstance();
+    private final IPizzaInfoService pizzaInfoService = PizzaInfoServiceSingleton.getInstance();
 
     private final ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
 
@@ -40,7 +40,7 @@ public class PizzaInfoServlet extends HttpServlet {
 
             try {
                 id = Long.parseLong(stringId);
-            } catch (NumberFormatException e) {
+            } catch (Exception e) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
@@ -77,7 +77,7 @@ public class PizzaInfoServlet extends HttpServlet {
         try {
             resp.getWriter().write(mapper.writeValueAsString(pizzaInfoService.create(mapper.readValue(req.getReader(), PizzaInfoDTO.class))));
         } catch (Exception e) {
-            if (e instanceof ValidationException) {
+            if (e instanceof ValidationException || e instanceof IOException || e instanceof NullPointerException) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
@@ -106,7 +106,7 @@ public class PizzaInfoServlet extends HttpServlet {
         try {
             id = Long.parseLong(stringId);
             versionDate = UnixTimeToLocalDateTimeConverter.convert(Long.parseLong(version));
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -114,23 +114,18 @@ public class PizzaInfoServlet extends HttpServlet {
         try {
             resp.getWriter().write(mapper.writeValueAsString(pizzaInfoService.update(id, mapper.readValue(req.getReader(), PizzaInfoDTO.class), versionDate)));
         } catch (Exception e) {
-            if (e instanceof ValidationException) {
+            if (e instanceof ValidationException || e instanceof IOException || e instanceof NullPointerException) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
 
-            if (e instanceof NotFoundException) {
+            if (e instanceof NotFoundException || e instanceof FKNotFound) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
 
             if (e instanceof WrongVersionException) {
                 resp.setStatus(HttpServletResponse.SC_CONFLICT);
-                return;
-            }
-
-            if (e instanceof FKNotFound) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
 
@@ -142,7 +137,6 @@ public class PizzaInfoServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding(CHARSET);
         resp.setCharacterEncoding(CHARSET);
-        resp.setContentType(CONTENT_TYPE);
 
         String stringId = req.getParameter("id");
         String version = req.getParameter("version");
@@ -153,7 +147,7 @@ public class PizzaInfoServlet extends HttpServlet {
         try {
             id = Long.parseLong(stringId);
             versionDate = UnixTimeToLocalDateTimeConverter.convert(Long.parseLong(version));
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }

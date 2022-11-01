@@ -3,7 +3,6 @@ package com.zephie.house.storage.entity;
 import com.zephie.house.core.api.IPizzaInfo;
 import com.zephie.house.core.dto.SystemPizzaInfoDTO;
 import com.zephie.house.storage.api.IPizzaInfoStorage;
-import com.zephie.house.util.DataSourceInitializer;
 import com.zephie.house.util.mappers.ResultSetToPizzaInfoMapper;
 
 import javax.sql.DataSource;
@@ -14,7 +13,6 @@ import java.util.HashSet;
 import java.util.Optional;
 
 public class PizzaInfoStorage implements IPizzaInfoStorage {
-    private static volatile PizzaInfoStorage instance;
     private final DataSource dataSource;
 
     private static final String INSERT = "INSERT INTO structure.pizza_info (pizza_id, size, dt_create, dt_update) VALUES (?, ?, ?, ?)";
@@ -32,8 +30,8 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     private static final String DELETE = "DELETE FROM structure.pizza_info WHERE id = ? AND dt_update = ?";
 
-    private PizzaInfoStorage() {
-        dataSource = DataSourceInitializer.getDataSource();
+    public PizzaInfoStorage(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Override
@@ -130,17 +128,5 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
             throw new RuntimeException("Something went wrong while deleting PizzaInfo");
         }
 
-    }
-
-    public static PizzaInfoStorage getInstance() {
-        if (instance == null) {
-            synchronized (PizzaInfoStorage.class) {
-                if (instance == null) {
-                    instance = new PizzaInfoStorage();
-                }
-            }
-        }
-
-        return instance;
     }
 }

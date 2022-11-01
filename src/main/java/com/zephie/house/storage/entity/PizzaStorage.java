@@ -3,7 +3,6 @@ package com.zephie.house.storage.entity;
 import com.zephie.house.core.api.IPizza;
 import com.zephie.house.core.dto.SystemPizzaDTO;
 import com.zephie.house.storage.api.IPizzaStorage;
-import com.zephie.house.util.DataSourceInitializer;
 import com.zephie.house.util.mappers.ResultSetToPizzaMapper;
 
 import javax.sql.DataSource;
@@ -14,9 +13,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 public class PizzaStorage implements IPizzaStorage {
-
-    private static volatile PizzaStorage instance;
-
     private final DataSource dataSource;
 
     private static final String INSERT = "INSERT INTO structure.pizza (name, description, dt_create, dt_update) VALUES (?, ?, ?, ?)";
@@ -26,8 +22,8 @@ public class PizzaStorage implements IPizzaStorage {
     private static final String DELETE = "DELETE FROM structure.pizza WHERE id = ? AND dt_update = ?";
     private static final String SELECT_BY_NAME = "SELECT id, name, description, dt_create, dt_update FROM structure.pizza WHERE name = ?";
 
-    private PizzaStorage() {
-        dataSource = DataSourceInitializer.getDataSource();
+    public PizzaStorage(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Override
@@ -137,17 +133,5 @@ public class PizzaStorage implements IPizzaStorage {
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Pizza");
         }
-    }
-
-    public static PizzaStorage getInstance() {
-        if (instance == null) {
-            synchronized (PizzaStorage.class) {
-                if (instance == null) {
-                    instance = new PizzaStorage();
-                }
-            }
-        }
-
-        return instance;
     }
 }

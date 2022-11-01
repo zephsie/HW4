@@ -1,20 +1,27 @@
 package com.zephie.house.controllers.web.servlets.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zephie.house.core.dto.MenuDTO;
 import com.zephie.house.services.api.IMenuService;
-import com.zephie.house.services.entity.MenuService;
+import com.zephie.house.services.singleton.MenuServiceSingleton;
+import com.zephie.house.util.exceptions.NotFoundException;
+import com.zephie.house.util.exceptions.NotUniqueException;
+import com.zephie.house.util.exceptions.ValidationException;
+import com.zephie.house.util.exceptions.WrongVersionException;
 import com.zephie.house.util.mappers.ObjectMapperFactory;
+import com.zephie.house.util.time.UnixTimeToLocalDateTimeConverter;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @WebServlet(name = "MenuServlet", urlPatterns = "/menu")
 public class MenuServlet extends HttpServlet {
 
-    private final IMenuService menuService = MenuService.getInstance();
+    private final IMenuService menuService = MenuServiceSingleton.getInstance();
 
     private final ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
 
@@ -59,6 +66,107 @@ public class MenuServlet extends HttpServlet {
             } catch (IOException e) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        req.setCharacterEncoding(CHARSET);
+        resp.setCharacterEncoding(CHARSET);
+        resp.setContentType(CONTENT_TYPE);
+
+        try {
+            resp.getWriter().write(mapper.writeValueAsString(menuService.create(mapper.readValue(req.getReader(), MenuDTO.class))));
+        } catch (Exception e) {
+            if (e instanceof ValidationException || e instanceof IOException || e instanceof NullPointerException) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+
+            if (e instanceof NotUniqueException) {
+                resp.setStatus(HttpServletResponse.SC_CONFLICT);
+                return;
+            }
+
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        req.setCharacterEncoding(CHARSET);
+        resp.setCharacterEncoding(CHARSET);
+        resp.setContentType(CONTENT_TYPE);
+
+        String stringId = req.getParameter("id");
+        String version = req.getParameter("version");
+
+        long id;
+        LocalDateTime versionDate;
+
+        try {
+            id = Long.parseLong(stringId);
+            versionDate = UnixTimeToLocalDateTimeConverter.convert(Long.parseLong(version));
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        try {
+            resp.getWriter().write(mapper.writeValueAsString(menuService.update(id, mapper.readValue(req.getReader(), MenuDTO.class), versionDate)));
+        } catch (Exception e) {
+            if (e instanceof ValidationException || e instanceof IOException || e instanceof NullPointerException) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+
+            if (e instanceof NotUniqueException || e instanceof WrongVersionException) {
+                resp.setStatus(HttpServletResponse.SC_CONFLICT);
+                return;
+            }
+
+            if (e instanceof NotFoundException) {
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        req.setCharacterEncoding(CHARSET);
+        resp.setCharacterEncoding(CHARSET);
+
+        String stringId = req.getParameter("id");
+        String version = req.getParameter("version");
+
+        long id;
+        LocalDateTime versionDate;
+
+        try {
+            id = Long.parseLong(stringId);
+            versionDate = UnixTimeToLocalDateTimeConverter.convert(Long.parseLong(version));
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        try {
+            menuService.delete(id, versionDate);
+        } catch (Exception e) {
+            if (e instanceof NotFoundException) {
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
+            if (e instanceof WrongVersionException) {
+                resp.setStatus(HttpServletResponse.SC_CONFLICT);
+                return;
+            }
+
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 }

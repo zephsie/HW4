@@ -5,7 +5,6 @@ import com.zephie.house.core.dto.PizzaDTO;
 import com.zephie.house.core.dto.SystemPizzaDTO;
 import com.zephie.house.services.api.IPizzaService;
 import com.zephie.house.storage.api.IPizzaStorage;
-import com.zephie.house.storage.entity.PizzaStorage;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.NotUniqueException;
 import com.zephie.house.util.exceptions.WrongVersionException;
@@ -17,12 +16,10 @@ import java.util.Optional;
 
 public class PizzaService implements IPizzaService {
 
-    private static volatile PizzaService instance;
-
     private final IPizzaStorage storage;
 
-    private PizzaService() {
-        storage = PizzaStorage.getInstance();
+    public PizzaService(IPizzaStorage storage) {
+        this.storage = storage;
     }
 
     @Override
@@ -80,9 +77,9 @@ public class PizzaService implements IPizzaService {
         }
 
         return storage.update(id, new SystemPizzaDTO(pizzaDTO.getName(),
-                pizzaDTO.getDescription(),
-                pizza.getCreateDate(),
-                LocalDateTime.now()),
+                        pizzaDTO.getDescription(),
+                        pizza.getCreateDate(),
+                        LocalDateTime.now()),
                 dateUpdate);
     }
 
@@ -109,16 +106,5 @@ public class PizzaService implements IPizzaService {
         }
 
         storage.delete(id, dateUpdate);
-    }
-
-    public static PizzaService getInstance() {
-        if (instance == null) {
-            synchronized (PizzaService.class) {
-                if (instance == null) {
-                    instance = new PizzaService();
-                }
-            }
-        }
-        return instance;
     }
 }

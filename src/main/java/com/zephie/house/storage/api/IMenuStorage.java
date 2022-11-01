@@ -3,8 +3,8 @@ package com.zephie.house.storage.api;
 import com.zephie.house.core.api.IMenu;
 import com.zephie.house.core.dto.SystemMenuDTO;
 
-public interface IMenuStorage extends IEssenceStorage<IMenu, SystemMenuDTO> {
-    void read(String name);
+import java.util.Optional;
 
-    void readWithoutRows(Long id);
+public interface IMenuStorage extends IEssenceStorage<IMenu, SystemMenuDTO> {
+    Optional<IMenu> read(String name);
 }

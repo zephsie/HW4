@@ -3,7 +3,7 @@ package com.zephie.house.controllers.web.servlets.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zephie.house.core.dto.PizzaDTO;
 import com.zephie.house.services.api.IPizzaService;
-import com.zephie.house.services.entity.PizzaService;
+import com.zephie.house.services.singleton.PizzaServiceSingleton;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.NotUniqueException;
 import com.zephie.house.util.exceptions.ValidationException;
@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @WebServlet(name = "PizzaServlet", urlPatterns = "/pizza")
 public class PizzaServlet extends HttpServlet {
 
-    private final IPizzaService pizzaService = PizzaService.getInstance();
+    private final IPizzaService pizzaService = PizzaServiceSingleton.getInstance();
 
     private final ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
 
@@ -41,7 +41,7 @@ public class PizzaServlet extends HttpServlet {
 
             try {
                 id = Long.parseLong(stringId);
-            } catch (NumberFormatException e) {
+            } catch (Exception e) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
@@ -78,7 +78,7 @@ public class PizzaServlet extends HttpServlet {
         try {
             resp.getWriter().write(mapper.writeValueAsString(pizzaService.create(mapper.readValue(req.getReader(), PizzaDTO.class))));
         } catch (Exception e) {
-            if (e instanceof ValidationException) {
+            if (e instanceof ValidationException || e instanceof IOException || e instanceof NullPointerException) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
@@ -107,7 +107,7 @@ public class PizzaServlet extends HttpServlet {
         try {
             id = Long.parseLong(stringId);
             versionDate = UnixTimeToLocalDateTimeConverter.convert(Long.parseLong(version));
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -115,23 +115,18 @@ public class PizzaServlet extends HttpServlet {
         try {
             resp.getWriter().write(mapper.writeValueAsString(pizzaService.update(id, mapper.readValue(req.getReader(), PizzaDTO.class), versionDate)));
         } catch (Exception e) {
-            if (e instanceof ValidationException) {
+            if (e instanceof ValidationException || e instanceof IOException || e instanceof NullPointerException) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
 
-            if (e instanceof NotUniqueException) {
+            if (e instanceof NotUniqueException || e instanceof WrongVersionException) {
                 resp.setStatus(HttpServletResponse.SC_CONFLICT);
                 return;
             }
 
             if (e instanceof NotFoundException) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            if (e instanceof WrongVersionException) {
-                resp.setStatus(HttpServletResponse.SC_CONFLICT);
                 return;
             }
 
@@ -143,7 +138,6 @@ public class PizzaServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding(CHARSET);
         resp.setCharacterEncoding(CHARSET);
-        resp.setContentType(CONTENT_TYPE);
 
         String stringId = req.getParameter("id");
         String version = req.getParameter("version");
@@ -154,7 +148,7 @@ public class PizzaServlet extends HttpServlet {
         try {
             id = Long.parseLong(stringId);
             versionDate = UnixTimeToLocalDateTimeConverter.convert(Long.parseLong(version));
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
