@@ -67,14 +67,14 @@ public class PizzaInfoService implements IPizzaInfoService {
             throw new NotFoundException("PizzaInfo with id " + id + " not found");
         }
 
-        if (pizzaStorage.read(pizzaInfoDTO.getPizzaId()).isEmpty()) {
-            throw new FKNotFound("Pizza with id " + pizzaInfoDTO.getPizzaId() + " not found");
-        }
-
         IPizzaInfo pizzaInfo = optionalPizzaInfo.get();
 
         if (!pizzaInfo.getUpdateDate().equals(dateUpdate)) {
             throw new WrongVersionException("PizzaInfo with id " + id + " has been updated");
+        }
+
+        if (pizzaStorage.read(pizzaInfoDTO.getPizzaId()).isEmpty()) {
+            throw new FKNotFound("Pizza with id " + pizzaInfoDTO.getPizzaId() + " not found");
         }
 
         return storage.update(id, new SystemPizzaInfoDTO(pizzaInfoDTO.getPizzaId(),

@@ -2,6 +2,7 @@ package com.zephie.house.services.singleton;
 
 import com.zephie.house.services.api.ISelectedItemService;
 import com.zephie.house.services.entity.SelectedItemService;
+import com.zephie.house.storage.singleton.MenuRowStorageSingleton;
 import com.zephie.house.storage.singleton.SelectedItemStorageSingleton;
 
 public class SelectedItemServiceSingleton {
@@ -10,7 +11,7 @@ public class SelectedItemServiceSingleton {
     private final ISelectedItemService selectedItemService;
 
     private SelectedItemServiceSingleton() {
-        selectedItemService = new SelectedItemService(SelectedItemStorageSingleton.getInstance());
+        selectedItemService = new SelectedItemService(SelectedItemStorageSingleton.getInstance(), MenuRowStorageSingleton.getInstance());
     }
 
     public static ISelectedItemService getInstance() {

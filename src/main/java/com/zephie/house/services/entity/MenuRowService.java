@@ -71,14 +71,6 @@ public class MenuRowService implements IMenuRowService {
             throw new IllegalArgumentException("DateUpdate cannot be null");
         }
 
-        if (pizzaInfoStorage.read(menuRowDTO.getPizzaInfoId()).isEmpty()) {
-            throw new FKNotFound("PizzaInfo with id " + menuRowDTO.getPizzaInfoId() + " not found");
-        }
-
-        if (menuStorage.read(menuRowDTO.getMenuId()).isEmpty()) {
-            throw new FKNotFound("Menu with id " + menuRowDTO.getMenuId() + " not found");
-        }
-
         Optional<IMenuRow> menuRow = menuRowStorage.read(id);
 
         if (menuRow.isEmpty()) {
@@ -89,6 +81,14 @@ public class MenuRowService implements IMenuRowService {
 
         if (!menuRowToUpdate.getUpdateDate().equals(dateUpdate)) {
             throw new WrongVersionException("MenuRow with id " + id + " has been updated");
+        }
+
+        if (pizzaInfoStorage.read(menuRowDTO.getPizzaInfoId()).isEmpty()) {
+            throw new FKNotFound("PizzaInfo with id " + menuRowDTO.getPizzaInfoId() + " not found");
+        }
+
+        if (menuStorage.read(menuRowDTO.getMenuId()).isEmpty()) {
+            throw new FKNotFound("Menu with id " + menuRowDTO.getMenuId() + " not found");
         }
 
         return menuRowStorage.update(id, new SystemMenuRowDTO(menuRowDTO.getMenuId(),

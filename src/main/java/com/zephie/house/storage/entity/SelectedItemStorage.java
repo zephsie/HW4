@@ -6,9 +6,7 @@ import com.zephie.house.storage.api.ISelectedItemStorage;
 import com.zephie.house.util.mappers.ResultSetToSelectedItemMapper;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
@@ -32,13 +30,37 @@ public class SelectedItemStorage implements ISelectedItemStorage {
             "\tJOIN structure.pizza ON pizza_id = pizza.id\n" +
             "\tWHERE selected_item.id = ?";
 
+    private static final String INSERT = "INSERT INTO structure.selected_item (menu_row_id, count, dt_create, dt_update) VALUES (?, ?, ?, ?)";
+
+    private static final String UPDATE = "UPDATE structure.selected_item SET menu_row_id = ?, count = ?, dt_update = ? WHERE id = ? AND dt_update = ?";
+
+    private static final String DELETE = "DELETE FROM structure.selected_item WHERE id = ? AND dt_update = ?";
+
     public SelectedItemStorage(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
     @Override
     public ISelectedItem create(SystemSelectedItemDTO systemSelectedItemDTO) {
-        return null;
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(INSERT, PreparedStatement.RETURN_GENERATED_KEYS)) {
+
+            preparedStatement.setLong(1, systemSelectedItemDTO.getMenuRowId());
+            preparedStatement.setInt(2, systemSelectedItemDTO.getCount());
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(systemSelectedItemDTO.getCreateDate()));
+            preparedStatement.setTimestamp(4, Timestamp.valueOf(systemSelectedItemDTO.getUpdateDate()));
+
+            preparedStatement.executeUpdate();
+
+            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return read(generatedKeys.getLong(1)).orElseThrow(() -> new RuntimeException("Something went wrong while reading created SelectedItem"));
+                } else {
+                    throw new RuntimeException("Something went wrong while creating SelectedItem");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Something went wrong while creating SelectedItem");
+        }
     }
 
     @Override
@@ -73,11 +95,40 @@ public class SelectedItemStorage implements ISelectedItemStorage {
 
     @Override
     public ISelectedItem update(Long id, SystemSelectedItemDTO systemSelectedItemDTO, LocalDateTime dateUpdate) {
-        return null;
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(UPDATE)) {
+
+            preparedStatement.setLong(1, systemSelectedItemDTO.getMenuRowId());
+            preparedStatement.setInt(2, systemSelectedItemDTO.getCount());
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(systemSelectedItemDTO.getUpdateDate()));
+
+            preparedStatement.setLong(4, id);
+            preparedStatement.setTimestamp(5, Timestamp.valueOf(dateUpdate));
+
+            int affectedRows = preparedStatement.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new RuntimeException("SelectedItem was not updated");
+            }
+
+            return read(id).orElseThrow(() -> new RuntimeException("Something went wrong while reading updated SelectedItem"));
+        } catch (SQLException e) {
+            throw new RuntimeException("Something went wrong while updating SelectedItem");
+        }
     }
 
     @Override
     public void delete(Long id, LocalDateTime dateUpdate) {
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(DELETE)) {
+            preparedStatement.setLong(1, id);
+            preparedStatement.setTimestamp(2, Timestamp.valueOf(dateUpdate));
 
+            int affectedRows = preparedStatement.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new RuntimeException("SelectedItem was not deleted");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Something went wrong while deleting SelectedItem");
+        }
     }
 }
