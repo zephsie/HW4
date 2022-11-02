@@ -42,9 +42,9 @@ public class PizzaStorage implements IPizzaStorage {
 
     @Override
     public Collection<IPizza> read() {
-        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
+        try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(SELECT)) {
 
-            try (ResultSet resultSet = statement.executeQuery(SELECT)) {
+            try (ResultSet resultSet = statement.executeQuery()) {
                 Collection<IPizza> pizzas = new ArrayList<>();
 
                 while (resultSet.next()) {

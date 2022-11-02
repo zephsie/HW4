@@ -73,9 +73,9 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     @Override
     public Collection<IPizzaInfo> read() {
-        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(SELECT)) {
 
-            try (ResultSet resultSet = statement.executeQuery(SELECT)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 Collection<IPizzaInfo> pizzaInfos = new HashSet<>();
 
                 while (resultSet.next()) {
