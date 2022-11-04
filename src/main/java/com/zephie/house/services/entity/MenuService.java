@@ -8,7 +8,7 @@ import com.zephie.house.storage.api.IMenuStorage;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.NotUniqueException;
 import com.zephie.house.util.exceptions.WrongVersionException;
-import com.zephie.house.util.validators.MenuValidator;
+import com.zephie.house.util.validators.BasicMenuValidator;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -23,7 +23,7 @@ public class MenuService implements IMenuService {
 
     @Override
     public IMenu create(MenuDTO menuDTO) {
-        MenuValidator.validate(menuDTO);
+        BasicMenuValidator.validate(menuDTO);
 
         if (menuStorage.read(menuDTO.getName()).isPresent()) {
             throw new NotUniqueException("Menu with name " + menuDTO.getName() + " already exists");
@@ -47,7 +47,7 @@ public class MenuService implements IMenuService {
 
     @Override
     public IMenu update(Long id, MenuDTO menuDTO, LocalDateTime dateUpdate) {
-        MenuValidator.validate(menuDTO);
+        BasicMenuValidator.validate(menuDTO);
 
         if (id == null) {
             throw new IllegalArgumentException("Id cannot be null");

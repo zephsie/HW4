@@ -6,7 +6,7 @@ import com.zephie.house.util.exceptions.ValidationException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PizzaValidator {
+public class BasicPizzaValidator {
     public static void validate(PizzaDTO pizzaDTO) {
         List<String> errors = new ArrayList<>();
 

@@ -1,6 +1,7 @@
 package com.zephie.house.core.builders;
 
 import com.zephie.house.core.api.IMenuRow;
+import com.zephie.house.core.api.IOrder;
 import com.zephie.house.core.entity.SelectedItem;
 
 import java.time.LocalDateTime;
@@ -8,9 +9,10 @@ import java.time.LocalDateTime;
 public class SelectedItemBuilder {
     private Long id;
     private IMenuRow menuRow;
-    private int count;
+
+    private IOrder order;
+    private Integer count;
     private LocalDateTime createDate;
-    private LocalDateTime updateDate;
 
     private SelectedItemBuilder() {
     }
@@ -29,7 +31,7 @@ public class SelectedItemBuilder {
         return this;
     }
 
-    public SelectedItemBuilder setCount(int count) {
+    public SelectedItemBuilder setCount(Integer count) {
         this.count = count;
         return this;
     }
@@ -39,12 +41,12 @@ public class SelectedItemBuilder {
         return this;
     }
 
-    public SelectedItemBuilder setUpdateDate(LocalDateTime updateDate) {
-        this.updateDate = updateDate;
+    public SelectedItemBuilder setOrder(IOrder order) {
+        this.order = order;
         return this;
     }
 
     public SelectedItem build() {
-        return new SelectedItem(id, menuRow, count, createDate, updateDate);
+        return new SelectedItem(id, menuRow, order, count, createDate);
     }
 }

@@ -2,13 +2,12 @@ package com.zephie.house.core.dto;
 
 public class SelectedItemDTO {
     private Long menuRowId;
-
-    private int count;
+    private Integer count;
 
     public SelectedItemDTO() {
     }
 
-    public SelectedItemDTO(Long menuRowId, int count) {
+    public SelectedItemDTO(Long menuRowId, Integer count) {
         this.menuRowId = menuRowId;
         this.count = count;
     }
@@ -21,11 +20,11 @@ public class SelectedItemDTO {
         this.menuRowId = menuRowId;
     }
 
-    public int getCount() {
+    public Integer getCount() {
         return count;
     }
 
-    public void setCount(int count) {
+    public void setCount(Integer count) {
         this.count = count;
     }
 }

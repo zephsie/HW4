@@ -5,7 +5,7 @@ import com.zephie.house.core.dto.MenuDTO;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MenuValidator {
+public class BasicMenuValidator {
     public static void validate(MenuDTO menuDTO) {
         List<String> errors = new ArrayList<>();
 

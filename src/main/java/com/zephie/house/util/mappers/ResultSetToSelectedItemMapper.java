@@ -10,8 +10,6 @@ public class ResultSetToSelectedItemMapper {
     public static ISelectedItem partialMap(ResultSet resultSet) throws SQLException {
         return SelectedItemBuilder.create()
                 .setId(resultSet.getLong("selected_item_id"))
-                .setMenuRow(ResultSetToMenuRowMapper.partialMap(resultSet))
-                .setCount(resultSet.getInt("selected_item_count"))
                 .build();
     }
 
@@ -20,8 +18,8 @@ public class ResultSetToSelectedItemMapper {
                 .setId(resultSet.getLong("selected_item_id"))
                 .setMenuRow(ResultSetToMenuRowMapper.partialMap(resultSet))
                 .setCount(resultSet.getInt("selected_item_count"))
+                .setOrder(ResultSetToOrderMapper.partialMap(resultSet))
                 .setCreateDate(resultSet.getTimestamp("dt_create").toLocalDateTime())
-                .setUpdateDate(resultSet.getTimestamp("dt_update").toLocalDateTime())
                 .build();
     }
 }

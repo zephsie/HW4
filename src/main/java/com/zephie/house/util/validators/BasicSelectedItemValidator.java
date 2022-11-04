@@ -6,7 +6,7 @@ import com.zephie.house.util.exceptions.ValidationException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectedItemValidator {
+public class BasicSelectedItemValidator {
     public static void validate (SelectedItemDTO selectedItemDTO) {
         List<String> errors = new ArrayList<>();
 

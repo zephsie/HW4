@@ -9,7 +9,7 @@ import com.zephie.house.storage.api.IPizzaStorage;
 import com.zephie.house.util.exceptions.FKNotFound;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.WrongVersionException;
-import com.zephie.house.util.validators.PizzaInfoValidator;
+import com.zephie.house.util.validators.BasicPizzaInfoValidator;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -27,9 +27,9 @@ public class PizzaInfoService implements IPizzaInfoService {
 
     @Override
     public IPizzaInfo create(PizzaInfoDTO pizzaInfoDTO) {
-        PizzaInfoValidator.validate(pizzaInfoDTO);
+        BasicPizzaInfoValidator.validate(pizzaInfoDTO);
 
-        if (pizzaStorage.read(pizzaInfoDTO.getPizzaId()).isEmpty()) {
+        if (!pizzaStorage.isPresent(pizzaInfoDTO.getPizzaId())) {
             throw new FKNotFound("Pizza with id " + pizzaInfoDTO.getPizzaId() + " not found");
         }
 
@@ -51,7 +51,7 @@ public class PizzaInfoService implements IPizzaInfoService {
 
     @Override
     public IPizzaInfo update(Long id, PizzaInfoDTO pizzaInfoDTO, LocalDateTime dateUpdate) {
-        PizzaInfoValidator.validate(pizzaInfoDTO);
+        BasicPizzaInfoValidator.validate(pizzaInfoDTO);
 
         if (id == null) {
             throw new IllegalArgumentException("Id cannot be null");
@@ -73,7 +73,7 @@ public class PizzaInfoService implements IPizzaInfoService {
             throw new WrongVersionException("PizzaInfo with id " + id + " has been updated");
         }
 
-        if (pizzaStorage.read(pizzaInfoDTO.getPizzaId()).isEmpty()) {
+        if (!pizzaStorage.isPresent(pizzaInfoDTO.getPizzaId())) {
             throw new FKNotFound("Pizza with id " + pizzaInfoDTO.getPizzaId() + " not found");
         }
 

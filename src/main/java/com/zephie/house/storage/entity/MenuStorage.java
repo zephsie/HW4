@@ -19,19 +19,20 @@ public class MenuStorage implements IMenuStorage {
 
     private static final String SELECT_BY_ID = "SELECT id menu_id, name menu_name, enable menu_enable, dt_create, dt_update FROM structure.menu WHERE id = ?";
 
-    private static final String SELECT_BY_NAME = "SELECT id menu_id, name menu_name, enable menu_enable, dt_create, dt_update FROM structure.menu WHERE name = ?";
-
     private static final String SELECT_MENU_ROWS_BY_MENU_ID = "SELECT menu_row.id menu_row_id, pizza_info_id, pizza_id, pizza.name pizza_name, size pizza_info_size, price menu_row_price\n" +
             "\tFROM structure.menu_row\n" +
             "\tJOIN structure.pizza_info ON pizza_info_id = pizza_info.id\n" +
             "\tJOIN structure.pizza ON pizza_id = pizza.id\n" +
             "\tWHERE menu_id = ?";
 
+    private static final String SELECT_BY_NAME = "SELECT id menu_id, name menu_name, enable menu_enable, dt_create, dt_update FROM structure.menu WHERE name = ?";
     private static final String INSERT = "INSERT INTO structure.menu (name, enable, dt_create, dt_update) VALUES (?, ?, ?, ?)";
 
     private static final String UPDATE = "UPDATE structure.menu SET name = ?, enable = ?, dt_update = ? WHERE id = ? AND dt_update = ?";
 
     private static final String DELETE = "DELETE FROM structure.menu WHERE id = ? AND dt_update = ?";
+
+    private static final String IS_EXISTS = "SELECT EXISTS(SELECT 1 FROM structure.menu WHERE id = ?)";
 
     private final DataSource dataSource;
 
@@ -54,7 +55,7 @@ public class MenuStorage implements IMenuStorage {
                 if (generatedKeys.next()) {
                     return read(generatedKeys.getLong(1)).orElseThrow(() -> new RuntimeException("Something went wrong while reading created Menu"));
                 } else {
-                    throw new RuntimeException("Something went wrong while creating Menu");
+                    throw new RuntimeException("Keys were not generated");
                 }
             }
 
@@ -82,6 +83,8 @@ public class MenuStorage implements IMenuStorage {
                                 menuRows.add(ResultSetToMenuMapper.fullMapRow(resultSetToGetMenuRows));
                             }
                         }
+                    } catch (SQLException e) {
+                        throw new RuntimeException("Something went wrong while reading MenuRows");
                     }
 
                     menu.setRows(menuRows);
@@ -94,21 +97,6 @@ public class MenuStorage implements IMenuStorage {
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Menu");
         }
-    }
-
-    @Override
-    public Optional<IMenu> read(String name) {
-        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_NAME)) {
-
-            preparedStatement.setString(1, name);
-
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                return resultSet.next() ? Optional.of(ResultSetToMenuMapper.fullMap(resultSet)) : Optional.empty();
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Something went wrong while reading Menu");
-        }
-
     }
 
     @Override
@@ -166,6 +154,34 @@ public class MenuStorage implements IMenuStorage {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while deleting Menu");
+        }
+    }
+
+    @Override
+    public boolean isPresent(Long id) {
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(IS_EXISTS)) {
+
+            preparedStatement.setLong(1, id);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next() && resultSet.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Something went wrong while checking Menu");
+        }
+    }
+
+    @Override
+    public Optional<IMenu> read(String name) {
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BY_NAME)) {
+
+            preparedStatement.setString(1, name);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next() ? Optional.of(ResultSetToMenuMapper.fullMap(resultSet)) : Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Something went wrong while reading Menu");
         }
     }
 }

@@ -30,6 +30,8 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     private static final String DELETE = "DELETE FROM structure.pizza_info WHERE id = ? AND dt_update = ?";
 
+    private static final String IS_EXIST = "SELECT EXISTS(SELECT 1 FROM structure.pizza_info WHERE id = ?)";
+
     public PizzaInfoStorage(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -49,7 +51,7 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
                 if (generatedKeys.next()) {
                     return read(generatedKeys.getLong(1)).orElseThrow(() -> new RuntimeException("Something went wrong while reading created PizzaInfo  "));
                 } else {
-                    throw new RuntimeException("Something went wrong while creating PizzaInfo");
+                    throw new RuntimeException("Keys were not generated");
                 }
             }
         } catch (SQLException e) {
@@ -128,5 +130,19 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
             throw new RuntimeException("Something went wrong while deleting PizzaInfo");
         }
 
+    }
+
+    @Override
+    public boolean isPresent(Long id) {
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(IS_EXIST)) {
+
+            preparedStatement.setLong(1, id);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next() && resultSet.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Something went wrong while checking PizzaInfo");
+        }
     }
 }

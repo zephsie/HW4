@@ -10,7 +10,7 @@ import com.zephie.house.storage.api.IPizzaInfoStorage;
 import com.zephie.house.util.exceptions.FKNotFound;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.WrongVersionException;
-import com.zephie.house.util.validators.MenuRowValidator;
+import com.zephie.house.util.validators.BasicMenuRowValidator;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -32,13 +32,13 @@ public class MenuRowService implements IMenuRowService {
 
     @Override
     public IMenuRow create(MenuRowDTO menuRowDTO) {
-        MenuRowValidator.validate(menuRowDTO);
+        BasicMenuRowValidator.validate(menuRowDTO);
 
-        if (pizzaInfoStorage.read(menuRowDTO.getPizzaInfoId()).isEmpty()) {
+        if (!pizzaInfoStorage.isPresent(menuRowDTO.getPizzaInfoId())) {
             throw new FKNotFound("PizzaInfo with id " + menuRowDTO.getPizzaInfoId() + " not found");
         }
 
-        if (menuStorage.read(menuRowDTO.getMenuId()).isEmpty()) {
+        if (!menuStorage.isPresent(menuRowDTO.getMenuId())) {
             throw new FKNotFound("Menu with id " + menuRowDTO.getMenuId() + " not found");
         }
 
@@ -61,7 +61,7 @@ public class MenuRowService implements IMenuRowService {
 
     @Override
     public IMenuRow update(Long id, MenuRowDTO menuRowDTO, LocalDateTime dateUpdate) {
-        MenuRowValidator.validate(menuRowDTO);
+        BasicMenuRowValidator.validate(menuRowDTO);
 
         if (id == null) {
             throw new IllegalArgumentException("Id cannot be null");
@@ -83,11 +83,11 @@ public class MenuRowService implements IMenuRowService {
             throw new WrongVersionException("MenuRow with id " + id + " has been updated");
         }
 
-        if (pizzaInfoStorage.read(menuRowDTO.getPizzaInfoId()).isEmpty()) {
+        if (!pizzaInfoStorage.isPresent(menuRowDTO.getPizzaInfoId())) {
             throw new FKNotFound("PizzaInfo with id " + menuRowDTO.getPizzaInfoId() + " not found");
         }
 
-        if (menuStorage.read(menuRowDTO.getMenuId()).isEmpty()) {
+        if (!menuStorage.isPresent(menuRowDTO.getMenuId())) {
             throw new FKNotFound("Menu with id " + menuRowDTO.getMenuId() + " not found");
         }
 

@@ -34,6 +34,10 @@ public class MenuRowStorage implements IMenuRowStorage {
 
     private static final String DELETE = "DELETE FROM structure.menu_row WHERE id = ? AND dt_update = ?";
 
+    private static final String IS_EXISTS = "SELECT EXISTS(SELECT 1 FROM structure.menu_row WHERE id = ?)";
+
+    private static final String CHECK_IF_EXISTS_AND_ACTIVE = "SELECT EXISTS(SELECT 1 FROM structure.menu_row JOIN structure.menu ON menu_id = menu.id WHERE menu_row.id = ? AND menu.enable = true)";
+
     public MenuRowStorage(DataSource dataSource) {
         this.dataSource = dataSource;
     }
@@ -54,7 +58,7 @@ public class MenuRowStorage implements IMenuRowStorage {
                 if (resultSet.next()) {
                     return read(resultSet.getLong(1)).orElseThrow(() -> new RuntimeException("Something went wrong while reading created MenuRow"));
                 } else {
-                    throw new RuntimeException("Something went wrong while creating MenuRow");
+                    throw new RuntimeException("Keys were not generated");
                 }
             }
 
@@ -130,6 +134,32 @@ public class MenuRowStorage implements IMenuRowStorage {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while deleting MenuRow");
+        }
+    }
+
+    @Override
+    public boolean isPresent(Long id) {
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(IS_EXISTS)) {
+            preparedStatement.setLong(1, id);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next() && resultSet.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Something went wrong while checking MenuRow");
+        }
+    }
+
+    @Override
+    public Boolean isAvailable(Long id) {
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(CHECK_IF_EXISTS_AND_ACTIVE)) {
+            preparedStatement.setLong(1, id);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next() && resultSet.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Something went wrong while checking MenuRow");
         }
     }
 }

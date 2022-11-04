@@ -5,20 +5,17 @@ import java.time.LocalDateTime;
 public class SystemSelectedItemDTO {
     private Long menuRowId;
 
-    private int count;
+    private Integer count;
 
     private LocalDateTime createDate;
-
-    private LocalDateTime updateDate;
 
     public SystemSelectedItemDTO() {
     }
 
-    public SystemSelectedItemDTO(Long menuRowId, int count, LocalDateTime createDate, LocalDateTime updateDate) {
+    public SystemSelectedItemDTO(Long menuRowId, Integer count, LocalDateTime createDate) {
         this.menuRowId = menuRowId;
         this.count = count;
         this.createDate = createDate;
-        this.updateDate = updateDate;
     }
 
     public Long getMenuRowId() {
@@ -29,11 +26,11 @@ public class SystemSelectedItemDTO {
         this.menuRowId = menuRowId;
     }
 
-    public int getCount() {
+    public Integer getCount() {
         return count;
     }
 
-    public void setCount(int count) {
+    public void setCount(Integer count) {
         this.count = count;
     }
 
@@ -43,13 +40,5 @@ public class SystemSelectedItemDTO {
 
     public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate;
-    }
-
-    public LocalDateTime getUpdateDate() {
-        return updateDate;
-    }
-
-    public void setUpdateDate(LocalDateTime updateDate) {
-        this.updateDate = updateDate;
     }
 }

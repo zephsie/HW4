@@ -2,6 +2,7 @@ package com.zephie.house.core.entity;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.zephie.house.core.api.IOrder;
 import com.zephie.house.core.api.ISelectedItem;
 import com.zephie.house.core.api.IMenuRow;
 import com.zephie.house.util.json.CustomLocalDateTimeDesSerializer;
@@ -13,21 +14,20 @@ import java.util.Objects;
 public class SelectedItem implements ISelectedItem {
     private Long id;
     private IMenuRow row;
-    private int count;
+    private IOrder order;
+    private Integer count;
 
     private LocalDateTime createDate;
-
-    private LocalDateTime updateDate;
 
     public SelectedItem() {
     }
 
-    public SelectedItem(Long id, IMenuRow row, int count, LocalDateTime createDate, LocalDateTime updateDate) {
+    public SelectedItem(Long id, IMenuRow row, IOrder order, Integer count, LocalDateTime createDate) {
         this.id = id;
         this.row = row;
+        this.order = order;
         this.count = count;
         this.createDate = createDate;
-        this.updateDate = updateDate;
     }
 
     @Override
@@ -51,12 +51,22 @@ public class SelectedItem implements ISelectedItem {
     }
 
     @Override
-    public int getCount() {
+    public IOrder getOrder() {
+        return order;
+    }
+
+    @Override
+    public void setOrder(IOrder order) {
+        this.order = order;
+    }
+
+    @Override
+    public Integer getCount() {
         return count;
     }
 
     @Override
-    public void setCount(int count) {
+    public void setCount(Integer count) {
         this.count = count;
     }
 
@@ -73,25 +83,13 @@ public class SelectedItem implements ISelectedItem {
     }
 
     @Override
-    @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
-    @JsonDeserialize(using = CustomLocalDateTimeDesSerializer.class)
-    public LocalDateTime getUpdateDate() {
-        return updateDate;
-    }
-
-    @Override
-    public void setUpdateDate(LocalDateTime updateDate) {
-        this.updateDate = updateDate;
-    }
-
-    @Override
     public String toString() {
         return "SelectedItem{" +
                 "id=" + id +
                 ", row=" + row +
+                ", order=" + order +
                 ", count=" + count +
                 ", createDate=" + createDate +
-                ", updateDate=" + updateDate +
                 '}';
     }
 

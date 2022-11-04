@@ -8,7 +8,7 @@ import com.zephie.house.storage.api.IPizzaStorage;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.NotUniqueException;
 import com.zephie.house.util.exceptions.WrongVersionException;
-import com.zephie.house.util.validators.PizzaValidator;
+import com.zephie.house.util.validators.BasicPizzaValidator;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -24,7 +24,7 @@ public class PizzaService implements IPizzaService {
 
     @Override
     public IPizza create(PizzaDTO pizzaDTO) {
-        PizzaValidator.validate(pizzaDTO);
+        BasicPizzaValidator.validate(pizzaDTO);
 
         if (storage.read(pizzaDTO.getName()).isPresent()) {
             throw new NotUniqueException("Pizza with name " + pizzaDTO.getName() + " already exists");
@@ -48,7 +48,7 @@ public class PizzaService implements IPizzaService {
 
     @Override
     public IPizza update(Long id, PizzaDTO pizzaDTO, LocalDateTime dateUpdate) {
-        PizzaValidator.validate(pizzaDTO);
+        BasicPizzaValidator.validate(pizzaDTO);
 
         if (id == null) {
             throw new IllegalArgumentException("Id cannot be null");

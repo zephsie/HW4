@@ -20,7 +20,8 @@ public class PizzaStorage implements IPizzaStorage {
     private static final String SELECT_BY_ID = "SELECT id pizza_id, name pizza_name, description pizza_description, dt_create, dt_update FROM structure.pizza WHERE id = ?";
     private static final String UPDATE = "UPDATE structure.pizza SET name = ?, description = ?, dt_update = ? WHERE id = ? AND dt_update = ?";
     private static final String DELETE = "DELETE FROM structure.pizza WHERE id = ? AND dt_update = ?";
-    private static final String SELECT_BY_NAME = "SELECT id, name, description, dt_create, dt_update FROM structure.pizza WHERE name = ?";
+    private static final String SELECT_BY_NAME = "SELECT id pizza_id, name pizza_name, description pizza_description, dt_create, dt_update FROM structure.pizza WHERE name = ?";
+    private static final String IS_EXIST = "SELECT EXISTS(SELECT 1 FROM structure.pizza WHERE id = ?)";
 
     public PizzaStorage(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -73,7 +74,7 @@ public class PizzaStorage implements IPizzaStorage {
                 if (generatedKeys.next()) {
                     return read(generatedKeys.getLong(1)).orElseThrow(() -> new RuntimeException("Something went wrong while reading created Pizza"));
                 } else {
-                    throw new RuntimeException("Something went wrong while creating Pizza");
+                    throw new RuntimeException("Keys were not generated");
                 }
             }
         } catch (SQLException e) {
@@ -118,6 +119,20 @@ public class PizzaStorage implements IPizzaStorage {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while deleting Pizza");
+        }
+    }
+
+    @Override
+    public boolean isPresent(Long id) {
+        try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(IS_EXIST)) {
+
+            preparedStatement.setLong(1, id);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next() && resultSet.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Something went wrong while checking Pizza");
         }
     }
 

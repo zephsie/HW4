@@ -10,7 +10,6 @@ import com.zephie.house.util.json.CustomLocalDateTimeDesSerializer;
 import com.zephie.house.util.json.CustomLocalDateTimeSerializer;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -29,7 +28,6 @@ public class Menu implements IMenu {
     private LocalDateTime updateDate;
 
     public Menu() {
-        rows = new HashSet<>();
     }
 
     public Menu(Long id, String name, Boolean active, LocalDateTime createDate, LocalDateTime updateDate) {
@@ -38,7 +36,6 @@ public class Menu implements IMenu {
         this.active = active;
         this.createDate = createDate;
         this.updateDate = updateDate;
-        rows = new HashSet<>();
     }
 
 

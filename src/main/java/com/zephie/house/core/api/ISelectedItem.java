@@ -11,15 +11,15 @@ public interface ISelectedItem {
 
     void setRow(IMenuRow row);
 
-    int getCount();
+    IOrder getOrder();
 
-    void setCount(int count);
+    void setOrder(IOrder order);
+
+    Integer getCount();
+
+    void setCount(Integer count);
 
     LocalDateTime getCreateDate();
 
     void setCreateDate(LocalDateTime createDate);
-
-    LocalDateTime getUpdateDate();
-
-    void setUpdateDate(LocalDateTime updateDate);
 }
