@@ -2,64 +2,74 @@ package com.zephie.house.core.entity;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.zephie.house.core.api.ISelectedItem;
+import com.zephie.house.core.api.ITicket;
 import com.zephie.house.core.api.IOrder;
 import com.zephie.house.util.json.CustomLocalDateTimeDesSerializer;
 import com.zephie.house.util.json.CustomLocalDateTimeSerializer;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Set;
 
-public class Order implements IOrder {
+public class Ticket implements ITicket {
     private Long id;
-    private Set<ISelectedItem> items;
+
+    private String ticketNumber;
+
+    private IOrder order;
+
     private LocalDateTime createDate;
 
-    public Order(Long id, LocalDateTime createDate, Set<ISelectedItem> items) {
-        this.id = id;
-        this.createDate = createDate;
-        this.items = items;
+    public Ticket() {
     }
 
-    @Override
+    public Ticket(Long id, String ticketNumber, IOrder order, LocalDateTime createDate) {
+        this.id = id;
+        this.ticketNumber = ticketNumber;
+        this.order = order;
+        this.createDate = createDate;
+    }
+
     public Long getId() {
         return id;
     }
 
-    @Override
     public void setId(Long id) {
         this.id = id;
     }
 
-    @Override
-    public Set<ISelectedItem> getItems() {
-        return items;
+    public String getTicketNumber() {
+        return ticketNumber;
     }
 
-    @Override
-    public void setItems(Set<ISelectedItem> selectedItems) {
-        this.items = selectedItems;
+    public void setTicketNumber(String ticketNumber) {
+        this.ticketNumber = ticketNumber;
     }
 
-    @Override
+    public IOrder getOrder() {
+        return order;
+    }
+
+    public void setOrder(IOrder order) {
+        this.order = order;
+    }
+
     @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
     @JsonDeserialize(using = CustomLocalDateTimeDesSerializer.class)
     public LocalDateTime getCreateDate() {
         return createDate;
     }
 
-    @Override
-    public void setCreateDate(LocalDateTime createDate) {
-        this.createDate = createDate;
+    public void setCreateDate(LocalDateTime createAt) {
+        this.createDate = createAt;
     }
 
     @Override
     public String toString() {
-        return "Order{" +
+        return "Ticket{" +
                 "id=" + id +
-                ", items=" + items +
-                ", createDate=" + createDate +
+                ", number='" + ticketNumber + '\'' +
+                ", order=" + order +
+                ", createAt=" + createDate +
                 '}';
     }
 
@@ -68,9 +78,9 @@ public class Order implements IOrder {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Order order = (Order) o;
+        Ticket ticket = (Ticket) o;
 
-        return Objects.equals(id, order.id);
+        return Objects.equals(id, ticket.id);
     }
 
     @Override

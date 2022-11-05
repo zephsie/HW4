@@ -51,6 +51,10 @@ public class OrderService implements IOrderService {
 
     @Override
     public Optional<IOrder> read(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
+
         return storage.read(id);
     }
 

@@ -37,6 +37,10 @@ public class MenuService implements IMenuService {
 
     @Override
     public Optional<IMenu> read(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
+
         return menuStorage.read(id);
     }
 

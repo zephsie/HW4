@@ -13,6 +13,10 @@ public class SelectedItemService {
     }
 
     public Optional<ISelectedItem> read(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
+
         return selectedItemStorage.read(id);
     }
 }

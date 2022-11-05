@@ -1,11 +1,12 @@
 package com.zephie.house.controllers.web.servlets.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zephie.house.core.dto.OrderDTO;
-import com.zephie.house.services.api.IOrderService;
-import com.zephie.house.services.singleton.OrderServiceSingleton;
+import com.zephie.house.core.dto.TicketDTO;
+import com.zephie.house.services.api.ITicketService;
+import com.zephie.house.services.singleton.TicketServiceSingleton;
 import com.zephie.house.util.exceptions.FKNotFound;
 import com.zephie.house.util.exceptions.NotFoundException;
+import com.zephie.house.util.exceptions.NotUniqueException;
 import com.zephie.house.util.exceptions.ValidationException;
 import com.zephie.house.util.mappers.ObjectMapperFactory;
 
@@ -15,9 +16,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet(name = "OrderServlet", urlPatterns = "/order")
-public class OrderServlet extends HttpServlet {
-    private final IOrderService orderService = OrderServiceSingleton.getInstance();
+@WebServlet(name = "TicketServlet", urlPatterns = "/ticket")
+public class TicketServlet extends HttpServlet {
+    private final ITicketService ticketService = TicketServiceSingleton.getInstance();
 
     private final ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
 
@@ -43,10 +44,10 @@ public class OrderServlet extends HttpServlet {
             }
 
             try {
-                orderService.read(id).ifPresentOrElse(
-                        order -> {
+                ticketService.read(id).ifPresentOrElse(
+                        ticket -> {
                             try {
-                                resp.getWriter().write(mapper.writeValueAsString(order));
+                                resp.getWriter().write(mapper.writeValueAsString(ticket));
                             } catch (IOException e) {
                                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                             }
@@ -58,7 +59,7 @@ public class OrderServlet extends HttpServlet {
             }
         } else {
             try {
-                resp.getWriter().write(mapper.writeValueAsString(orderService.read()));
+                resp.getWriter().write(mapper.writeValueAsString(ticketService.read()));
             } catch (Exception e) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
@@ -71,21 +72,23 @@ public class OrderServlet extends HttpServlet {
         resp.setCharacterEncoding(CHARSET);
         resp.setContentType(CONTENT_TYPE);
 
-        OrderDTO orderDTO;
+        TicketDTO ticketDTO;
 
         try {
-            orderDTO = mapper.readValue(req.getReader(), OrderDTO.class);
+            ticketDTO = mapper.readValue(req.getReader(), TicketDTO.class);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         try {
-            resp.getWriter().write(mapper.writeValueAsString(orderService.create(orderDTO)));
+            resp.getWriter().write(mapper.writeValueAsString(ticketService.create(ticketDTO)));
         } catch (ValidationException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } catch (FKNotFound e) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } catch (NotUniqueException e) {
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
@@ -108,7 +111,7 @@ public class OrderServlet extends HttpServlet {
         }
 
         try {
-            orderService.delete(id);
+            ticketService.delete(id);
         } catch (NotFoundException e) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         } catch (Exception e) {

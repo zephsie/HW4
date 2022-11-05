@@ -41,6 +41,10 @@ public class PizzaInfoService implements IPizzaInfoService {
 
     @Override
     public Optional<IPizzaInfo> read(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
+
         return storage.read(id);
     }
 
