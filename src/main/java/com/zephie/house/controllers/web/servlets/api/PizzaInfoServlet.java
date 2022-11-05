@@ -54,7 +54,7 @@ public class PizzaInfoServlet extends HttpServlet {
                                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                             }
                         },
-                        () -> resp.setStatus(HttpServletResponse.SC_NOT_FOUND)
+                        () -> resp.setStatus(HttpServletResponse.SC_NO_CONTENT)
                 );
             } catch (Exception e) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -62,7 +62,7 @@ public class PizzaInfoServlet extends HttpServlet {
         } else {
             try {
                 resp.getWriter().write(mapper.writeValueAsString(pizzaInfoService.read()));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         }
@@ -74,19 +74,22 @@ public class PizzaInfoServlet extends HttpServlet {
         resp.setCharacterEncoding(CHARSET);
         resp.setContentType(CONTENT_TYPE);
 
+        PizzaInfoDTO pizzaInfoDTO;
+
         try {
-            resp.getWriter().write(mapper.writeValueAsString(pizzaInfoService.create(mapper.readValue(req.getReader(), PizzaInfoDTO.class))));
+            pizzaInfoDTO = mapper.readValue(req.getReader(), PizzaInfoDTO.class);
         } catch (Exception e) {
-            if (e instanceof ValidationException || e instanceof IOException || e instanceof NullPointerException) {
-                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
-            if (e instanceof FKNotFound) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
+        try {
+            resp.getWriter().write(mapper.writeValueAsString(pizzaInfoService.create(pizzaInfoDTO)));
+        } catch (ValidationException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (FKNotFound e) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -102,33 +105,28 @@ public class PizzaInfoServlet extends HttpServlet {
 
         long id;
         LocalDateTime versionDate;
+        PizzaInfoDTO pizzaInfoDTO;
 
         try {
             id = Long.parseLong(stringId);
             versionDate = UnixTimeToLocalDateTimeConverter.convert(Long.parseLong(version));
+            pizzaInfoDTO = mapper.readValue(req.getReader(), PizzaInfoDTO.class);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         try {
-            resp.getWriter().write(mapper.writeValueAsString(pizzaInfoService.update(id, mapper.readValue(req.getReader(), PizzaInfoDTO.class), versionDate)));
+            resp.getWriter().write(mapper.writeValueAsString(pizzaInfoService.update(id, pizzaInfoDTO, versionDate)));
+        } catch (ValidationException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (FKNotFound e) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } catch (NotFoundException e) {
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } catch (WrongVersionException e) {
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
         } catch (Exception e) {
-            if (e instanceof ValidationException || e instanceof IOException || e instanceof NullPointerException) {
-                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-
-            if (e instanceof NotFoundException || e instanceof FKNotFound) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            if (e instanceof WrongVersionException) {
-                resp.setStatus(HttpServletResponse.SC_CONFLICT);
-                return;
-            }
-
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -154,17 +152,11 @@ public class PizzaInfoServlet extends HttpServlet {
 
         try {
             pizzaInfoService.delete(id, versionDate);
+        } catch (NotFoundException e) {
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } catch (WrongVersionException e) {
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
         } catch (Exception e) {
-            if (e instanceof NotFoundException) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            if (e instanceof WrongVersionException) {
-                resp.setStatus(HttpServletResponse.SC_CONFLICT);
-                return;
-            }
-
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }

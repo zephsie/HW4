@@ -47,7 +47,7 @@ public class SelectedItemServlet extends HttpServlet {
                                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                             }
                         },
-                        () -> resp.setStatus(HttpServletResponse.SC_NOT_FOUND)
+                        () -> resp.setStatus(HttpServletResponse.SC_NO_CONTENT)
                 );
             } catch (Exception e) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

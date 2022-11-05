@@ -59,7 +59,7 @@ public class OrderServlet extends HttpServlet {
         } else {
             try {
                 resp.getWriter().write(mapper.writeValueAsString(orderService.read()));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         }
@@ -71,19 +71,22 @@ public class OrderServlet extends HttpServlet {
         resp.setCharacterEncoding(CHARSET);
         resp.setContentType(CONTENT_TYPE);
 
+        OrderDTO orderDTO;
+
         try {
-            resp.getWriter().write(mapper.writeValueAsString(orderService.create(mapper.readValue(req.getReader(), OrderDTO.class))));
+            orderDTO = mapper.readValue(req.getReader(), OrderDTO.class);
         } catch (Exception e) {
-            if (e instanceof ValidationException || e instanceof IOException || e instanceof NullPointerException) {
-                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
-            if (e instanceof FKNotFound) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
+        try {
+            resp.getWriter().write(mapper.writeValueAsString(orderService.create(orderDTO)));
+        } catch (ValidationException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (FKNotFound e) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -106,12 +109,9 @@ public class OrderServlet extends HttpServlet {
 
         try {
             orderService.delete(id);
+        } catch (NotFoundException e) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         } catch (Exception e) {
-            if (e instanceof NotFoundException) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }

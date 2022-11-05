@@ -63,7 +63,7 @@ public class MenuRowServlet extends HttpServlet {
         } else {
             try {
                 resp.getWriter().write(mapper.writeValueAsString(menuRowService.read()));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         }
@@ -75,19 +75,22 @@ public class MenuRowServlet extends HttpServlet {
         resp.setCharacterEncoding(CHARSET);
         resp.setContentType(CONTENT_TYPE);
 
+        MenuRowDTO menuRowDTO;
+
         try {
-            resp.getWriter().write(mapper.writeValueAsString(menuRowService.create(mapper.readValue(req.getReader(), MenuRowDTO.class))));
+            menuRowDTO = mapper.readValue(req.getReader(), MenuRowDTO.class);
         } catch (Exception e) {
-            if (e instanceof FKNotFound) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
 
-            if (e instanceof IOException || e instanceof NullPointerException || e instanceof ValidationException) {
-                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-
+        try {
+            resp.getWriter().write(mapper.writeValueAsString(menuRowService.create(menuRowDTO)));
+        } catch (FKNotFound e) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } catch (ValidationException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -103,33 +106,28 @@ public class MenuRowServlet extends HttpServlet {
 
         long id;
         LocalDateTime versionDate;
+        MenuRowDTO menuRowDTO;
 
         try {
             id = Long.parseLong(stringId);
             versionDate = UnixTimeToLocalDateTimeConverter.convert(Long.parseLong(version));
+            menuRowDTO = mapper.readValue(req.getReader(), MenuRowDTO.class);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         try {
-            resp.getWriter().write(mapper.writeValueAsString(menuRowService.update(id, mapper.readValue(req.getReader(), MenuRowDTO.class), versionDate)));
+            resp.getWriter().write(mapper.writeValueAsString(menuRowService.update(id, menuRowDTO, versionDate)));
+        } catch (ValidationException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (NotFoundException e) {
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } catch (FKNotFound e) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } catch (WrongVersionException e) {
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
         } catch (Exception e) {
-            if (e instanceof ValidationException || e instanceof NullPointerException || e instanceof IOException) {
-                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-
-            if (e instanceof FKNotFound || e instanceof NotFoundException) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
-            if (e instanceof WrongVersionException) {
-                resp.setStatus(HttpServletResponse.SC_CONFLICT);
-                return;
-            }
-
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
@@ -155,17 +153,11 @@ public class MenuRowServlet extends HttpServlet {
 
         try {
             menuRowService.delete(id, versionDate);
+        } catch (WrongVersionException e) {
+            resp.setStatus(HttpServletResponse.SC_CONFLICT);
+        } catch (NotFoundException e) {
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (Exception e) {
-            if (e instanceof WrongVersionException) {
-                resp.setStatus(HttpServletResponse.SC_CONFLICT);
-                return;
-            }
-
-            if (e instanceof NotFoundException) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                return;
-            }
-
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
