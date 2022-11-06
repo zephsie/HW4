@@ -8,7 +8,7 @@ import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.NotUniqueException;
 import com.zephie.house.util.exceptions.ValidationException;
 import com.zephie.house.util.exceptions.WrongVersionException;
-import com.zephie.house.util.mappers.ObjectMapperFactory;
+import com.zephie.house.util.json.ObjectMapperFactory;
 import com.zephie.house.util.time.UnixTimeToLocalDateTimeConverter;
 
 import javax.servlet.annotation.WebServlet;

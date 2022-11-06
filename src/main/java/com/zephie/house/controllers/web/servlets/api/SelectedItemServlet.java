@@ -3,7 +3,7 @@ package com.zephie.house.controllers.web.servlets.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zephie.house.services.entity.SelectedItemService;
 import com.zephie.house.services.singleton.SelectedItemServiceSingleton;
-import com.zephie.house.util.mappers.ObjectMapperFactory;
+import com.zephie.house.util.json.ObjectMapperFactory;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;

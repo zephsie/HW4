@@ -1,9 +1,9 @@
 package com.zephie.house.controllers.web.servlets.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zephie.house.core.dto.PizzaDTO;
-import com.zephie.house.services.api.IPizzaService;
-import com.zephie.house.services.singleton.PizzaServiceSingleton;
+import com.zephie.house.core.dto.StageDTO;
+import com.zephie.house.services.api.IStageService;
+import com.zephie.house.services.singleton.StageServiceSingleton;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.NotUniqueException;
 import com.zephie.house.util.exceptions.ValidationException;
@@ -18,10 +18,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-@WebServlet(name = "PizzaServlet", urlPatterns = "/pizza")
-public class PizzaServlet extends HttpServlet {
-
-    private final IPizzaService pizzaService = PizzaServiceSingleton.getInstance();
+@WebServlet(name = "StageServlet", urlPatterns = "/stage")
+public class StageServlet extends HttpServlet {
+    private final IStageService stageService = StageServiceSingleton.getInstance();
 
     private final ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
 
@@ -47,10 +46,10 @@ public class PizzaServlet extends HttpServlet {
             }
 
             try {
-                pizzaService.read(id).ifPresentOrElse(
-                        pizza -> {
+                stageService.read(id).ifPresentOrElse(
+                        stage -> {
                             try {
-                                resp.getWriter().write(mapper.writeValueAsString(pizza));
+                                resp.getWriter().write(mapper.writeValueAsString(stage));
                             } catch (IOException e) {
                                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                             }
@@ -62,7 +61,7 @@ public class PizzaServlet extends HttpServlet {
             }
         } else {
             try {
-                resp.getWriter().write(mapper.writeValueAsString(pizzaService.read()));
+                resp.getWriter().write(mapper.writeValueAsString(stageService.read()));
             } catch (Exception e) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
@@ -75,17 +74,17 @@ public class PizzaServlet extends HttpServlet {
         resp.setCharacterEncoding(CHARSET);
         resp.setContentType(CONTENT_TYPE);
 
-        PizzaDTO pizzaDTO;
+        StageDTO stageDTO;
 
         try {
-            pizzaDTO = mapper.readValue(req.getReader(), PizzaDTO.class);
+            stageDTO = mapper.readValue(req.getReader(), StageDTO.class);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         try {
-            resp.getWriter().write(mapper.writeValueAsString(pizzaService.create(pizzaDTO)));
+            resp.getWriter().write(mapper.writeValueAsString(stageService.create(stageDTO)));
         } catch (ValidationException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } catch (NotUniqueException e) {
@@ -106,19 +105,19 @@ public class PizzaServlet extends HttpServlet {
 
         long id;
         LocalDateTime versionDate;
-        PizzaDTO pizzaDTO;
+        StageDTO stageDTO;
 
         try {
             id = Long.parseLong(stringId);
             versionDate = UnixTimeToLocalDateTimeConverter.convert(Long.parseLong(version));
-            pizzaDTO = mapper.readValue(req.getReader(), PizzaDTO.class);
+            stageDTO = mapper.readValue(req.getReader(), StageDTO.class);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         try {
-            resp.getWriter().write(mapper.writeValueAsString(pizzaService.update(id, pizzaDTO, versionDate)));
+            resp.getWriter().write(mapper.writeValueAsString(stageService.update(id, stageDTO, versionDate)));
         } catch (ValidationException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } catch (NotUniqueException | WrongVersionException e) {
@@ -150,7 +149,7 @@ public class PizzaServlet extends HttpServlet {
         }
 
         try {
-            pizzaService.delete(id, versionDate);
+            stageService.delete(id, versionDate);
         } catch (NotFoundException e) {
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (WrongVersionException e) {

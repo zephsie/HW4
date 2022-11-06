@@ -1,4 +1,4 @@
-package com.zephie.house.util.mappers;
+package com.zephie.house.util.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;

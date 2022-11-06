@@ -8,7 +8,7 @@ import com.zephie.house.util.exceptions.FKNotFound;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.NotUniqueException;
 import com.zephie.house.util.exceptions.ValidationException;
-import com.zephie.house.util.mappers.ObjectMapperFactory;
+import com.zephie.house.util.json.ObjectMapperFactory;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
