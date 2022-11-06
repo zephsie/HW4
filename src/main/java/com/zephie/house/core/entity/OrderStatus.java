@@ -1,44 +1,44 @@
 package com.zephie.house.core.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.zephie.house.core.api.IMenu;
-import com.zephie.house.core.api.IMenuRow;
+import com.zephie.house.core.api.ITicket;
+import com.zephie.house.core.api.IOrderStatus;
+import com.zephie.house.core.api.IStage;
 import com.zephie.house.util.json.CustomLocalDateTimeDesSerializer;
 import com.zephie.house.util.json.CustomLocalDateTimeSerializer;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Menu implements IMenu {
+public class OrderStatus implements IOrderStatus {
     private Long id;
 
-    private String name;
+    private ITicket ticket;
 
-    private Boolean active;
+    private Boolean isDone;
 
-    private Set<IMenuRow> rows;
+    private Map<IStage, LocalTime> history;
 
     private LocalDateTime createDate;
 
     private LocalDateTime updateDate;
 
-    public Menu() {
+    public OrderStatus() {
     }
 
-    public Menu(Long id, String name, Boolean active, Set<IMenuRow> rows, LocalDateTime createDate, LocalDateTime updateDate) {
+    public OrderStatus(Long id, Ticket ticket, Boolean isDone, Map<IStage, LocalTime> history, LocalDateTime createDate, LocalDateTime updateDate) {
         this.id = id;
-        this.name = name;
-        this.active = active;
-        this.rows = rows;
+        this.ticket = ticket;
+        this.isDone = isDone;
+        this.history = history;
         this.createDate = createDate;
         this.updateDate = updateDate;
     }
-
 
     @Override
     public Long getId() {
@@ -51,33 +51,33 @@ public class Menu implements IMenu {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public ITicket getTicket() {
+        return ticket;
     }
 
     @Override
-    public void setName(String name) {
-        this.name = name;
+    public void setTicket(ITicket ticket) {
+        this.ticket = ticket;
     }
 
     @Override
-    public Boolean getActive() {
-        return active;
+    public Boolean getIsDone() {
+        return isDone;
     }
 
     @Override
-    public void setActive(Boolean active) {
-        this.active = active;
+    public void setIsDone(Boolean isDone) {
+        this.isDone = isDone;
     }
 
     @Override
-    public Set<IMenuRow> getRows() {
-        return rows;
+    public Map<IStage, LocalTime> getHistory() {
+        return history;
     }
 
     @Override
-    public void setRows(Set<IMenuRow> rows) {
-        this.rows = rows;
+    public void setHistory(Map<IStage, LocalTime> history) {
+        this.history = history;
     }
 
     @Override
@@ -88,8 +88,8 @@ public class Menu implements IMenu {
     }
 
     @Override
-    public void setCreateDate(LocalDateTime createDate) {
-        this.createDate = createDate;
+    public void setCreateDate(LocalDateTime createAt) {
+        this.createDate = createAt;
     }
 
     @Override
@@ -100,17 +100,17 @@ public class Menu implements IMenu {
     }
 
     @Override
-    public void setUpdateDate(LocalDateTime updateDate) {
-        this.updateDate = updateDate;
+    public void setUpdateDate(LocalDateTime updateAt) {
+        this.updateDate = updateAt;
     }
 
     @Override
     public String toString() {
-        return "Menu{" +
+        return "OrderStatus{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
-                ", active=" + active +
-                ", rows=" + rows +
+                ", ticket=" + ticket +
+                ", isDone=" + isDone +
+                ", history=" + history +
                 ", createDate=" + createDate +
                 ", updateDate=" + updateDate +
                 '}';
@@ -121,9 +121,9 @@ public class Menu implements IMenu {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Menu menu = (Menu) o;
+        OrderStatus that = (OrderStatus) o;
 
-        return Objects.equals(id, menu.id);
+        return Objects.equals(id, that.id);
     }
 
     @Override

@@ -10,10 +10,7 @@ import com.zephie.house.util.mappers.ResultSetToSelectedItemMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class OrderStorage implements IOrderStorage {
     private final DataSource dataSource;
@@ -118,7 +115,7 @@ public class OrderStorage implements IOrderStorage {
     public Collection<IOrder> read() {
         try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ORDER)) {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                Set<IOrder> orders = new HashSet<>();
+                Collection<IOrder> orders = new HashSet<>();
                 while (resultSet.next()) {
                     IOrder order = ResultSetToOrderMapper.partialMap(resultSet);
 

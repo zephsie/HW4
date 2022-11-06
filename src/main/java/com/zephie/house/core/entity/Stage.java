@@ -1,44 +1,33 @@
 package com.zephie.house.core.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.zephie.house.core.api.IMenu;
-import com.zephie.house.core.api.IMenuRow;
+import com.zephie.house.core.api.IStage;
 import com.zephie.house.util.json.CustomLocalDateTimeDesSerializer;
 import com.zephie.house.util.json.CustomLocalDateTimeSerializer;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
-import java.util.Set;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Menu implements IMenu {
+public class Stage implements IStage {
     private Long id;
 
-    private String name;
-
-    private Boolean active;
-
-    private Set<IMenuRow> rows;
+    private String description;
 
     private LocalDateTime createDate;
 
     private LocalDateTime updateDate;
 
-    public Menu() {
+    public Stage() {
     }
 
-    public Menu(Long id, String name, Boolean active, Set<IMenuRow> rows, LocalDateTime createDate, LocalDateTime updateDate) {
+    public Stage(Long id, String description, LocalDateTime createDate, LocalDateTime updateDate) {
         this.id = id;
-        this.name = name;
-        this.active = active;
-        this.rows = rows;
+        this.description = description;
         this.createDate = createDate;
         this.updateDate = updateDate;
     }
-
 
     @Override
     public Long getId() {
@@ -51,33 +40,13 @@ public class Menu implements IMenu {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public String getDescription() {
+        return description;
     }
 
     @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public Boolean getActive() {
-        return active;
-    }
-
-    @Override
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
-
-    @Override
-    public Set<IMenuRow> getRows() {
-        return rows;
-    }
-
-    @Override
-    public void setRows(Set<IMenuRow> rows) {
-        this.rows = rows;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
@@ -88,8 +57,8 @@ public class Menu implements IMenu {
     }
 
     @Override
-    public void setCreateDate(LocalDateTime createDate) {
-        this.createDate = createDate;
+    public void setCreateDate(LocalDateTime createAt) {
+        this.createDate = createAt;
     }
 
     @Override
@@ -100,17 +69,15 @@ public class Menu implements IMenu {
     }
 
     @Override
-    public void setUpdateDate(LocalDateTime updateDate) {
-        this.updateDate = updateDate;
+    public void setUpdateDate(LocalDateTime updateAt) {
+        this.updateDate = updateAt;
     }
 
     @Override
     public String toString() {
-        return "Menu{" +
+        return "Stage{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
-                ", active=" + active +
-                ", rows=" + rows +
+                ", description='" + description + '\'' +
                 ", createDate=" + createDate +
                 ", updateDate=" + updateDate +
                 '}';
@@ -121,9 +88,9 @@ public class Menu implements IMenu {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Menu menu = (Menu) o;
+        Stage stage = (Stage) o;
 
-        return Objects.equals(id, menu.id);
+        return Objects.equals(id, stage.id);
     }
 
     @Override

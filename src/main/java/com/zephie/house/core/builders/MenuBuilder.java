@@ -59,9 +59,6 @@ public class MenuBuilder {
     }
 
     public Menu build() {
-        Menu menu = new Menu(id, name, active, createDate, updateDate);
-        menu.setRows(rows);
-
-        return menu;
+        return new Menu(id, name, active, rows, createDate, updateDate);
     }
 }

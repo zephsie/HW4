@@ -8,8 +8,8 @@ import com.zephie.house.util.mappers.ResultSetToPizzaMapper;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 
 public class PizzaStorage implements IPizzaStorage {
@@ -46,7 +46,7 @@ public class PizzaStorage implements IPizzaStorage {
         try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(SELECT)) {
 
             try (ResultSet resultSet = statement.executeQuery()) {
-                Collection<IPizza> pizzas = new ArrayList<>();
+                Collection<IPizza> pizzas = new HashSet<>();
 
                 while (resultSet.next()) {
                     pizzas.add(ResultSetToPizzaMapper.partialMap(resultSet));
