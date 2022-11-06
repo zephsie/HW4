@@ -5,16 +5,13 @@ import java.time.LocalDateTime;
 public class SystemOrderStatusDTO {
     private Long ticketId;
 
-    private Long stageId;
-
     private LocalDateTime createDate;
 
     public SystemOrderStatusDTO() {
     }
 
-    public SystemOrderStatusDTO(Long ticketId, Long stageId, LocalDateTime createDate) {
+    public SystemOrderStatusDTO(Long ticketId, LocalDateTime createDate) {
         this.ticketId = ticketId;
-        this.stageId = stageId;
         this.createDate = createDate;
     }
 
@@ -24,14 +21,6 @@ public class SystemOrderStatusDTO {
 
     public void setTicketId(Long ticketId) {
         this.ticketId = ticketId;
-    }
-
-    public Long getStageId() {
-        return stageId;
-    }
-
-    public void setStageId(Long stageId) {
-        this.stageId = stageId;
     }
 
     public LocalDateTime getCreateDate() {

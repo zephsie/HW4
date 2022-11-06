@@ -1,5 +1,6 @@
 package com.zephie.house.core.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.zephie.house.core.api.IOrderStatus;
 import com.zephie.house.core.api.IStage;
 import com.zephie.house.core.api.IStageStatus;
@@ -12,6 +13,7 @@ public class StageStatus implements IStageStatus {
 
     private IStage stage;
 
+    @JsonFormat(pattern = "hh:mm:ss")
     private LocalTime startTime;
 
     public StageStatus() {

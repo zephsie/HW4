@@ -1,7 +1,5 @@
 package com.zephie.house.core.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.zephie.house.core.api.IMenu;
@@ -13,7 +11,6 @@ import com.zephie.house.util.json.CustomLocalDateTimeSerializer;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class MenuRow implements IMenuRow {
     private Long id;
 
