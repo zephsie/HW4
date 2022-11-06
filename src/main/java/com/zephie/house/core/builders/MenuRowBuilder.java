@@ -1,6 +1,7 @@
 package com.zephie.house.core.builders;
 
 import com.zephie.house.core.api.IMenu;
+import com.zephie.house.core.api.IMenuRow;
 import com.zephie.house.core.api.IPizzaInfo;
 import com.zephie.house.core.entity.MenuRow;
 
@@ -53,7 +54,7 @@ public class MenuRowBuilder {
         return this;
     }
 
-    public MenuRow build() {
+    public IMenuRow build() {
         return new MenuRow(id, pizzaInfo, menu, price, createDate, updateDate);
     }
 }

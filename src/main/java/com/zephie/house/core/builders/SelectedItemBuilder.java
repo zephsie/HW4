@@ -2,6 +2,7 @@ package com.zephie.house.core.builders;
 
 import com.zephie.house.core.api.IMenuRow;
 import com.zephie.house.core.api.IOrder;
+import com.zephie.house.core.api.ISelectedItem;
 import com.zephie.house.core.entity.SelectedItem;
 
 import java.time.LocalDateTime;
@@ -46,7 +47,7 @@ public class SelectedItemBuilder {
         return this;
     }
 
-    public SelectedItem build() {
+    public ISelectedItem build() {
         return new SelectedItem(id, menuRow, order, count, createDate);
     }
 }

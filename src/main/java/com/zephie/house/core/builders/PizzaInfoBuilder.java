@@ -1,6 +1,7 @@
 package com.zephie.house.core.builders;
 
 import com.zephie.house.core.api.IPizza;
+import com.zephie.house.core.api.IPizzaInfo;
 import com.zephie.house.core.entity.PizzaInfo;
 
 import java.time.LocalDateTime;
@@ -48,7 +49,7 @@ public class PizzaInfoBuilder {
         return this;
     }
 
-    public PizzaInfo build() {
+    public IPizzaInfo build() {
         return new PizzaInfo(id, pizza, size, createDate, updateDate);
     }
 }

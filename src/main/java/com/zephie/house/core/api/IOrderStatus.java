@@ -1,8 +1,7 @@
 package com.zephie.house.core.api;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Map;
+import java.util.Set;
 
 public interface IOrderStatus {
     Long getId();
@@ -13,19 +12,11 @@ public interface IOrderStatus {
 
     void setTicket(ITicket ticket);
 
-    Boolean getIsDone();
+    Set<IStageStatus> getHistory();
 
-    void setIsDone(Boolean isDone);
-
-    Map<IStage, LocalTime> getHistory();
-
-    void setHistory(Map<IStage, LocalTime> history);
+    void setHistory(Set<IStageStatus> history);
 
     LocalDateTime getCreateDate();
 
     void setCreateDate(LocalDateTime createAt);
-
-    LocalDateTime getUpdateDate();
-
-    void setUpdateDate(LocalDateTime updateAt);
 }

@@ -1,5 +1,6 @@
 package com.zephie.house.core.builders;
 
+import com.zephie.house.core.api.IMenu;
 import com.zephie.house.core.api.IMenuRow;
 import com.zephie.house.core.entity.Menu;
 
@@ -58,7 +59,7 @@ public class MenuBuilder {
         return this;
     }
 
-    public Menu build() {
+    public IMenu build() {
         return new Menu(id, name, active, rows, createDate, updateDate);
     }
 }

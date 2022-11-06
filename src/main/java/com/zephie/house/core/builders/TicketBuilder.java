@@ -1,6 +1,7 @@
 package com.zephie.house.core.builders;
 
 import com.zephie.house.core.api.IOrder;
+import com.zephie.house.core.api.ITicket;
 import com.zephie.house.core.entity.Ticket;
 
 import java.time.LocalDateTime;
@@ -41,7 +42,7 @@ public class TicketBuilder {
         return this;
     }
 
-    public Ticket build() {
+    public ITicket build() {
         return new Ticket(id, ticketNumber, order, createDate);
     }
 }

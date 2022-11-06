@@ -1,5 +1,6 @@
 package com.zephie.house.core.builders;
 
+import com.zephie.house.core.api.IStage;
 import com.zephie.house.core.entity.Stage;
 
 import java.time.LocalDateTime;
@@ -40,7 +41,7 @@ public class StageBuilder {
         return this;
     }
 
-    public Stage build() {
+    public IStage build() {
         return new Stage(id, description, createDate, updateDate);
     }
 }
