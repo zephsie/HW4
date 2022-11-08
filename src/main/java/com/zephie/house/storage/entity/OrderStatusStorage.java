@@ -10,10 +10,7 @@ import com.zephie.house.util.mappers.ResultSetToStageStatusMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class OrderStatusStorage implements IOrderStatusStorage {
     private final DataSource dataSource;
@@ -27,9 +24,11 @@ public class OrderStatusStorage implements IOrderStatusStorage {
             "\tJOIN structure.ticket ON ticket.id = ticket_id\n" +
             "\tWHERE order_status.id = ?";
 
-    private static final String SELECT_ORDER_STATUS = "SELECT order_status.id order_status_id, ticket_id, ticket_number\n" +
+    private static final String SELECT_ORDER_STATUS = "SELECT order_status_id, ticket_id, ticket_number, stage_id, stage.description stage_description, start_time order_status_stage_start_time\n" +
             "\tFROM structure.order_status\n" +
-            "\tJOIN structure.ticket ON ticket.id = ticket_id";
+            "\tJOIN structure.ticket ON ticket.id = ticket_id\n" +
+            "\tJOIN structure.order_status_stage ON order_status.id = order_status_id\n" +
+            "\tJOIN structure.stage ON stage_id = stage.id";
 
     private static final String SELECT_STAGE_STATUS_BY_ORDER_STATUS_ID = "SELECT stage_id, stage.description stage_description, start_time order_status_stage_start_time\n" +
             "\tFROM structure.order_status_stage\n" +
@@ -106,27 +105,16 @@ public class OrderStatusStorage implements IOrderStatusStorage {
     public Collection<IOrderStatus> read() {
         try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ORDER_STATUS)) {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                Collection<IOrderStatus> orderStatuses = new HashSet<>();
+                Map<Long, IOrderStatus> orderStatuses = new HashMap<>();
+
                 while (resultSet.next()) {
                     IOrderStatus orderStatus = ResultSetToOrderStatusMapper.partialMap(resultSet);
+                    IStageStatus stageStatus = ResultSetToStageStatusMapper.fullMap(resultSet);
 
-                    Set<IStageStatus> stageStatuses = new HashSet<>();
-
-                    try (PreparedStatement statementToGetItems = connection.prepareStatement(SELECT_STAGE_STATUS_BY_ORDER_STATUS_ID)) {
-                        statementToGetItems.setLong(1, orderStatus.getId());
-                        try (ResultSet resultSetToGetSelectedItems = statementToGetItems.executeQuery()) {
-                            while (resultSetToGetSelectedItems.next()) {
-                                stageStatuses.add(ResultSetToStageStatusMapper.fullMap(resultSetToGetSelectedItems));
-                            }
-                        }
-                    } catch (SQLException e) {
-                        throw new RuntimeException("Something went wrong while reading StageStatus");
-                    }
-
-                    orderStatus.setHistory(stageStatuses);
-                    orderStatuses.add(orderStatus);
+                    orderStatuses.computeIfAbsent(orderStatus.getId(), k -> orderStatus).setHistory(new HashSet<>(Collections.singletonList(stageStatus)));
                 }
-                return orderStatuses;
+
+                return orderStatuses.values();
             }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading OrderStatus");

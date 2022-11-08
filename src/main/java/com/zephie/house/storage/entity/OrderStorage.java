@@ -23,7 +23,9 @@ public class OrderStorage implements IOrderStorage {
 
     private static final String INSERT_INTO_SELECTED_ITEM = "INSERT INTO structure.selected_item (menu_row_id, order_id, count, dt_create) VALUES (?, ?, ?, ?)";
 
-    private static final String SELECT_ORDER = "SELECT id order_id FROM structure.order_table";
+    private static final String SELECT_ORDER = "SELECT order_id, selected_item.id selected_item_id\n" +
+            "\tFROM structure.order_table\n" +
+            "\tJOIN structure.selected_item ON order_id = order_table.id";
 
     private static final String SELECT_ORDER_BY_ID = "SELECT id order_id, dt_create FROM structure.order_table WHERE id = ?";
 
@@ -115,27 +117,16 @@ public class OrderStorage implements IOrderStorage {
     public Collection<IOrder> read() {
         try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ORDER)) {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                Collection<IOrder> orders = new HashSet<>();
+                Map<Long, IOrder> orders = new HashMap<>();
+
                 while (resultSet.next()) {
                     IOrder order = ResultSetToOrderMapper.partialMap(resultSet);
+                    ISelectedItem selectedItem = ResultSetToSelectedItemMapper.partialMap(resultSet);
 
-                    Set<ISelectedItem> selectedItems = new HashSet<>();
-
-                    try (PreparedStatement statementToGetItems = connection.prepareStatement(SELECT_SELECTED_ITEM_BY_ORDER_ID)) {
-                        statementToGetItems.setLong(1, order.getId());
-                        try (ResultSet resultSetToGetSelectedItems = statementToGetItems.executeQuery()) {
-                            while (resultSetToGetSelectedItems.next()) {
-                                selectedItems.add(ResultSetToSelectedItemMapper.partialMap(resultSetToGetSelectedItems));
-                            }
-                        }
-                    } catch (SQLException e) {
-                        throw new RuntimeException("Something went wrong while reading SelectedItem");
-                    }
-
-                    order.setItems(selectedItems);
-                    orders.add(order);
+                    orders.computeIfAbsent(order.getId(), k -> order).setItems(new HashSet<>(Collections.singletonList(selectedItem)));
                 }
-                return orders;
+
+                return orders.values();
             }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Order");
