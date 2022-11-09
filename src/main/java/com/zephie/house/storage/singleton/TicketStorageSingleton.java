@@ -2,7 +2,7 @@ package com.zephie.house.storage.singleton;
 
 import com.zephie.house.storage.api.ITicketStorage;
 import com.zephie.house.storage.entity.TicketStorage;
-import com.zephie.house.util.DataSourceInitializer;
+import com.zephie.house.util.db.DataSourceInitializer;
 
 public class TicketStorageSingleton {
     private static volatile TicketStorageSingleton instance;

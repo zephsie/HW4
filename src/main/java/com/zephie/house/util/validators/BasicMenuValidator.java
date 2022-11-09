@@ -14,9 +14,7 @@ public class BasicMenuValidator {
         } else {
             if (menuDTO.getName() == null || menuDTO.getName().isEmpty()) {
                 errors.add("Menu name is required");
-            }
-
-            if (menuDTO.getName().length() > 32) {
+            } else if (menuDTO.getName().length() > 32) {
                 errors.add("Menu name is too long");
             }
 

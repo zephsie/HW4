@@ -118,11 +118,25 @@ public class MenuRow implements IMenuRow {
 
         MenuRow menuRow = (MenuRow) o;
 
-        return Objects.equals(id, menuRow.id);
+        if (Double.compare(menuRow.price, price) != 0) return false;
+        if (!Objects.equals(id, menuRow.id)) return false;
+        if (!Objects.equals(pizzaInfo, menuRow.pizzaInfo)) return false;
+        if (!Objects.equals(menu, menuRow.menu)) return false;
+        if (!Objects.equals(createDate, menuRow.createDate)) return false;
+        return Objects.equals(updateDate, menuRow.updateDate);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        int result;
+        long temp;
+        result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (pizzaInfo != null ? pizzaInfo.hashCode() : 0);
+        result = 31 * result + (menu != null ? menu.hashCode() : 0);
+        temp = Double.doubleToLongBits(price);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (createDate != null ? createDate.hashCode() : 0);
+        result = 31 * result + (updateDate != null ? updateDate.hashCode() : 0);
+        return result;
     }
 }

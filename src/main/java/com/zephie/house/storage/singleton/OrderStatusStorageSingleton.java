@@ -2,7 +2,7 @@ package com.zephie.house.storage.singleton;
 
 import com.zephie.house.storage.api.IOrderStatusStorage;
 import com.zephie.house.storage.entity.OrderStatusStorage;
-import com.zephie.house.util.DataSourceInitializer;
+import com.zephie.house.util.db.DataSourceInitializer;
 
 public class OrderStatusStorageSingleton {
     private static volatile OrderStatusStorageSingleton instance;

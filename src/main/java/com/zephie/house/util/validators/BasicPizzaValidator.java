@@ -15,17 +15,13 @@ public class BasicPizzaValidator {
         } else {
             if (pizzaDTO.getName() == null || pizzaDTO.getName().isBlank()) {
                 errors.add("Name is empty");
-            }
-
-            if (pizzaDTO.getName().length() > 32) {
+            } else if (pizzaDTO.getName().length() > 32) {
                 errors.add("Name is too long");
             }
 
             if (pizzaDTO.getDescription() == null || pizzaDTO.getDescription().isBlank()) {
                 errors.add("Description is empty");
-            }
-
-            if (pizzaDTO.getDescription().length() > 128) {
+            } else if (pizzaDTO.getDescription().length() > 128) {
                 errors.add("Description is too long");
             }
         }

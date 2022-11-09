@@ -103,11 +103,20 @@ public class Pizza implements IPizza {
 
         Pizza pizza = (Pizza) o;
 
-        return Objects.equals(id, pizza.id);
+        if (!Objects.equals(id, pizza.id)) return false;
+        if (!Objects.equals(name, pizza.name)) return false;
+        if (!Objects.equals(description, pizza.description)) return false;
+        if (!Objects.equals(createDate, pizza.createDate)) return false;
+        return Objects.equals(updateDate, pizza.updateDate);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (createDate != null ? createDate.hashCode() : 0);
+        result = 31 * result + (updateDate != null ? updateDate.hashCode() : 0);
+        return result;
     }
 }

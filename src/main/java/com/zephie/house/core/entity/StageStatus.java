@@ -72,13 +72,15 @@ public class StageStatus implements IStageStatus {
         StageStatus that = (StageStatus) o;
 
         if (!Objects.equals(orderStatus, that.orderStatus)) return false;
-        return Objects.equals(stage, that.stage);
+        if (!Objects.equals(stage, that.stage)) return false;
+        return Objects.equals(startTime, that.startTime);
     }
 
     @Override
     public int hashCode() {
         int result = orderStatus != null ? orderStatus.hashCode() : 0;
         result = 31 * result + (stage != null ? stage.hashCode() : 0);
+        result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
         return result;
     }
 }

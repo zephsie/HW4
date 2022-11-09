@@ -19,7 +19,7 @@ public class BasicOrderValidator {
 
             orderDTO.getItems().forEach(item -> {
                 if (item.getCount() < 1) {
-                    errors.add("Item count must be at least 1");
+                    errors.add("Item count with menuRowId " + item.getMenuRowId() + " is less than 1");
                 }
             });
         }

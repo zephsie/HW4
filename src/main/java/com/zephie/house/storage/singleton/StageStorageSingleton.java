@@ -2,7 +2,7 @@ package com.zephie.house.storage.singleton;
 
 import com.zephie.house.storage.api.IStageStorage;
 import com.zephie.house.storage.entity.StageStorage;
-import com.zephie.house.util.DataSourceInitializer;
+import com.zephie.house.util.db.DataSourceInitializer;
 
 public class StageStorageSingleton {
     private static volatile StageStorageSingleton instance;

@@ -80,11 +80,18 @@ public class Ticket implements ITicket {
 
         Ticket ticket = (Ticket) o;
 
-        return Objects.equals(id, ticket.id);
+        if (!Objects.equals(id, ticket.id)) return false;
+        if (!Objects.equals(ticketNumber, ticket.ticketNumber)) return false;
+        if (!Objects.equals(order, ticket.order)) return false;
+        return Objects.equals(createDate, ticket.createDate);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (ticketNumber != null ? ticketNumber.hashCode() : 0);
+        result = 31 * result + (order != null ? order.hashCode() : 0);
+        result = 31 * result + (createDate != null ? createDate.hashCode() : 0);
+        return result;
     }
 }

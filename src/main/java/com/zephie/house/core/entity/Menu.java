@@ -120,11 +120,22 @@ public class Menu implements IMenu {
 
         Menu menu = (Menu) o;
 
-        return Objects.equals(id, menu.id);
+        if (!Objects.equals(id, menu.id)) return false;
+        if (!Objects.equals(name, menu.name)) return false;
+        if (!Objects.equals(active, menu.active)) return false;
+        if (!Objects.equals(rows, menu.rows)) return false;
+        if (!Objects.equals(createDate, menu.createDate)) return false;
+        return Objects.equals(updateDate, menu.updateDate);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (active != null ? active.hashCode() : 0);
+        result = 31 * result + (rows != null ? rows.hashCode() : 0);
+        result = 31 * result + (createDate != null ? createDate.hashCode() : 0);
+        result = 31 * result + (updateDate != null ? updateDate.hashCode() : 0);
+        return result;
     }
 }

@@ -1,4 +1,4 @@
-package com.zephie.house.util;
+package com.zephie.house.util.db;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 

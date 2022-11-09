@@ -2,7 +2,7 @@ package com.zephie.house.storage.singleton;
 
 import com.zephie.house.storage.api.IPizzaInfoStorage;
 import com.zephie.house.storage.entity.PizzaInfoStorage;
-import com.zephie.house.util.DataSourceInitializer;
+import com.zephie.house.util.db.DataSourceInitializer;
 
 public class PizzaInfoStorageSingleton {
     private static volatile PizzaInfoStorageSingleton instance;

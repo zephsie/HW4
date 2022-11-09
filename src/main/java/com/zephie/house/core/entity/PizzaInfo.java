@@ -105,11 +105,20 @@ public class PizzaInfo implements IPizzaInfo {
 
         PizzaInfo pizzaInfo = (PizzaInfo) o;
 
-        return Objects.equals(id, pizzaInfo.id);
+        if (size != pizzaInfo.size) return false;
+        if (!Objects.equals(id, pizzaInfo.id)) return false;
+        if (!Objects.equals(pizza, pizzaInfo.pizza)) return false;
+        if (!Objects.equals(createDate, pizzaInfo.createDate)) return false;
+        return Objects.equals(updateDate, pizzaInfo.updateDate);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (pizza != null ? pizza.hashCode() : 0);
+        result = 31 * result + size;
+        result = 31 * result + (createDate != null ? createDate.hashCode() : 0);
+        result = 31 * result + (updateDate != null ? updateDate.hashCode() : 0);
+        return result;
     }
 }

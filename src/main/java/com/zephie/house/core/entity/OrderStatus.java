@@ -90,11 +90,18 @@ public class OrderStatus implements IOrderStatus {
 
         OrderStatus that = (OrderStatus) o;
 
-        return Objects.equals(id, that.id);
+        if (!Objects.equals(id, that.id)) return false;
+        if (!Objects.equals(ticket, that.ticket)) return false;
+        if (!Objects.equals(history, that.history)) return false;
+        return Objects.equals(createDate, that.createDate);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (ticket != null ? ticket.hashCode() : 0);
+        result = 31 * result + (history != null ? history.hashCode() : 0);
+        result = 31 * result + (createDate != null ? createDate.hashCode() : 0);
+        return result;
     }
 }

@@ -15,9 +15,7 @@ public class BasicStageValidator {
         } else {
             if (stageDTO.getDescription() == null || stageDTO.getDescription().isEmpty()) {
                 errors.add("Description is null or empty");
-            }
-
-            if (stageDTO.getDescription().length() > 16) {
+            } else if (stageDTO.getDescription().length() > 16) {
                 errors.add("Description is too long");
             }
         }

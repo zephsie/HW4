@@ -100,11 +100,20 @@ public class SelectedItem implements ISelectedItem {
 
         SelectedItem that = (SelectedItem) o;
 
-        return Objects.equals(id, that.id);
+        if (!Objects.equals(id, that.id)) return false;
+        if (!Objects.equals(row, that.row)) return false;
+        if (!Objects.equals(order, that.order)) return false;
+        if (!Objects.equals(count, that.count)) return false;
+        return Objects.equals(createDate, that.createDate);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (row != null ? row.hashCode() : 0);
+        result = 31 * result + (order != null ? order.hashCode() : 0);
+        result = 31 * result + (count != null ? count.hashCode() : 0);
+        result = 31 * result + (createDate != null ? createDate.hashCode() : 0);
+        return result;
     }
 }

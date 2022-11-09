@@ -19,10 +19,8 @@ public class BasicTicketValidator {
 
             if (ticketDTO.getTicketNumber() == null || ticketDTO.getTicketNumber().isEmpty()) {
                 errors.add("Ticket number cannot be null or empty");
-            }
-
-            if (ticketDTO.getTicketNumber().length() > 10) {
-                errors.add("Ticket number cannot be longer than 10 characters");
+            } else if (ticketDTO.getTicketNumber().length() > 10) {
+                errors.add("Ticket number cannot be longer than 50 characters");
             }
         }
 

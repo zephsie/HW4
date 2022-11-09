@@ -70,11 +70,16 @@ public class Order implements IOrder {
 
         Order order = (Order) o;
 
-        return Objects.equals(id, order.id);
+        if (!Objects.equals(id, order.id)) return false;
+        if (!Objects.equals(items, order.items)) return false;
+        return Objects.equals(createDate, order.createDate);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (items != null ? items.hashCode() : 0);
+        result = 31 * result + (createDate != null ? createDate.hashCode() : 0);
+        return result;
     }
 }

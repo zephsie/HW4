@@ -7,7 +7,6 @@ import com.zephie.house.util.json.CustomLocalDateTimeDesSerializer;
 import com.zephie.house.util.json.CustomLocalDateTimeSerializer;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Objects;
 
 public class Stage implements IStage {
@@ -90,11 +89,18 @@ public class Stage implements IStage {
 
         Stage stage = (Stage) o;
 
-        return Objects.equals(id, stage.id);
+        if (!Objects.equals(id, stage.id)) return false;
+        if (!Objects.equals(description, stage.description)) return false;
+        if (!Objects.equals(createDate, stage.createDate)) return false;
+        return Objects.equals(updateDate, stage.updateDate);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (createDate != null ? createDate.hashCode() : 0);
+        result = 31 * result + (updateDate != null ? updateDate.hashCode() : 0);
+        return result;
     }
 }
