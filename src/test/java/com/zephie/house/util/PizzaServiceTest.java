@@ -182,6 +182,8 @@ public class PizzaServiceTest {
 
         Optional<IPizza> result = pizzaService.read(1L);
 
+        verify(pizzaStorage).read(1L);
+
         assert result.isEmpty();
     }
 
