@@ -3,7 +3,7 @@ package com.zephie.house.storage.entity;
 import com.zephie.house.core.api.IStage;
 import com.zephie.house.core.dto.SystemStageDTO;
 import com.zephie.house.storage.api.IStageStorage;
-import com.zephie.house.util.mappers.ResultSetToStageMapper;
+import com.zephie.house.util.mappers.entity.ResultSetToStageMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -14,6 +14,8 @@ import java.util.Optional;
 
 public class StageStorage implements IStageStorage {
     private final DataSource dataSource;
+
+    private final ResultSetToStageMapper resultSetToStageMapper;
 
     private static final String SELECT_BY_ID = "SELECT id stage_id, description stage_description, dt_create, dt_update FROM structure.stage WHERE id = ?";
 
@@ -29,8 +31,9 @@ public class StageStorage implements IStageStorage {
 
     private static final String DELETE = "DELETE FROM structure.stage WHERE id = ? AND dt_update = ?";
 
-    public StageStorage(DataSource dataSource) {
+    public StageStorage(DataSource dataSource, ResultSetToStageMapper resultSetToStageMapper) {
         this.dataSource = dataSource;
+        this.resultSetToStageMapper = resultSetToStageMapper;
     }
 
     @Override
@@ -62,7 +65,7 @@ public class StageStorage implements IStageStorage {
             preparedStatement.setLong(1, id);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                return resultSet.next() ? Optional.of(ResultSetToStageMapper.fullMap(resultSet)) : Optional.empty();
+                return resultSet.next() ? Optional.of(resultSetToStageMapper.fullMap(resultSet)) : Optional.empty();
             }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Stage");
@@ -77,7 +80,7 @@ public class StageStorage implements IStageStorage {
                 Collection<IStage> stages = new HashSet<>();
 
                 while (resultSet.next()) {
-                    stages.add(ResultSetToStageMapper.partialMap(resultSet));
+                    stages.add(resultSetToStageMapper.partialMap(resultSet));
                 }
 
                 return stages;
@@ -147,7 +150,7 @@ public class StageStorage implements IStageStorage {
             preparedStatement.setString(1, name);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                return resultSet.next() ? Optional.of(ResultSetToStageMapper.fullMap(resultSet)) : Optional.empty();
+                return resultSet.next() ? Optional.of(resultSetToStageMapper.fullMap(resultSet)) : Optional.empty();
             }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Stage");

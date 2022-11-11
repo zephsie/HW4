@@ -3,7 +3,7 @@ package com.zephie.house.storage.entity;
 import com.zephie.house.core.api.ITicket;
 import com.zephie.house.core.dto.SystemTicketDTO;
 import com.zephie.house.storage.api.ITicketStorage;
-import com.zephie.house.util.mappers.ResultSetToTicketMapper;
+import com.zephie.house.util.mappers.entity.ResultSetToTicketMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -14,6 +14,8 @@ import java.util.Optional;
 public class TicketStorage implements ITicketStorage {
     private final DataSource dataSource;
 
+    private final ResultSetToTicketMapper resultSetToTicketMapper;
+
     private static final String SELECT_TICKET_BY_ID = "SELECT id ticket_id, ticket_number, order_id, dt_create FROM structure.ticket WHERE id = ?";
 
     private static final String SELECT_TICKET = "SELECT id ticket_id, ticket_number, order_id FROM structure.ticket";
@@ -23,8 +25,9 @@ public class TicketStorage implements ITicketStorage {
     private static final String DELETE = "DELETE FROM structure.ticket WHERE id = ?";
     private static final String INSERT = "INSERT INTO structure.ticket (ticket_number, order_id, dt_create) VALUES (?, ?, ?)";
 
-    public TicketStorage(DataSource dataSource) {
+    public TicketStorage(DataSource dataSource, ResultSetToTicketMapper resultSetToTicketMapper) {
         this.dataSource = dataSource;
+        this.resultSetToTicketMapper = resultSetToTicketMapper;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class TicketStorage implements ITicketStorage {
             preparedStatement.setLong(1, id);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                return resultSet.next() ? Optional.of(ResultSetToTicketMapper.fullMap(resultSet)) : Optional.empty();
+                return resultSet.next() ? Optional.of(resultSetToTicketMapper.fullMap(resultSet)) : Optional.empty();
             }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Order");
@@ -70,7 +73,7 @@ public class TicketStorage implements ITicketStorage {
                 Collection<ITicket> tickets = new HashSet<>();
 
                 while (resultSet.next()) {
-                    tickets.add(ResultSetToTicketMapper.partialMap(resultSet));
+                    tickets.add(resultSetToTicketMapper.partialMap(resultSet));
                 }
 
                 return tickets;

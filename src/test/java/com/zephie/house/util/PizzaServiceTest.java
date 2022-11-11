@@ -10,6 +10,7 @@ import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.NotUniqueException;
 import com.zephie.house.util.exceptions.ValidationException;
 import com.zephie.house.util.exceptions.WrongVersionException;
+import com.zephie.house.util.validators.api.IValidator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -28,12 +29,16 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class PizzaServiceTest {
     @Mock
     private IPizzaStorage pizzaStorage;
+
+    @Mock
+    private IValidator<PizzaDTO> validator;
 
     @InjectMocks
     private PizzaService pizzaService;
@@ -46,66 +51,102 @@ public class PizzaServiceTest {
     @Test(expected = ValidationException.class)
     @DisplayName("Null dto creation")
     public void testCreateNull() {
+        doThrow(ValidationException.class).when(validator).validate(null);
+
         pizzaService.create(null);
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Empty name creation")
     public void testCreateEmptyName() {
-        pizzaService.create(new PizzaDTO("", "description"));
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName("");
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.create(dto);
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Blank name creation")
     public void testCreateBlankName() {
-        pizzaService.create(new PizzaDTO(" ", "description"));
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName(" ");
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.create(dto);
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Null name creation")
     public void testCreateNullName() {
-        pizzaService.create(new PizzaDTO(null, "description"));
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName(null);
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.create(dto);
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Empty description creation")
     public void testCreateEmptyDescription() {
-        pizzaService.create(new PizzaDTO("name", ""));
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName("name");
+        dto.setDescription("");
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.create(dto);
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Blank description creation")
     public void testCreateBlankDescription() {
-        pizzaService.create(new PizzaDTO("name", " "));
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName("name");
+        dto.setDescription(" ");
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.create(dto);
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Null description creation")
     public void testCreateNullDescription() {
-        pizzaService.create(new PizzaDTO("name", null));
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName("name");
+        dto.setDescription(null);
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.create(dto);
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Name too long creation")
     public void testCreateNameTooLong() {
-        pizzaService.create(new PizzaDTO("name".repeat(100), "description"));
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName("name");
+        dto.setDescription("description");
+        dto.setName("name".repeat(100));
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.create(dto);
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Description too long creation")
     public void testCreateDescriptionTooLong() {
-        pizzaService.create(new PizzaDTO("name", "description".repeat(100)));
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName("name");
+        dto.setDescription("description");
+        dto.setDescription("description".repeat(100));
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.create(dto);
     }
 
     @Test(expected = NotUniqueException.class)
     @DisplayName("Not unique name creation")
     public void testCreateNotUnique() {
-        IPizza pizza = PizzaBuilder.create()
-                .setName("name")
-                .setDescription("description")
-                .setCreateDate(LocalDateTime.now())
-                .setUpdateDate(LocalDateTime.now())
-                .build();
+        IPizza pizza = PizzaBuilder.create().setName("name").setDescription("description").setCreateDate(LocalDateTime.now()).setUpdateDate(LocalDateTime.now()).build();
 
         given(pizzaStorage.read("name")).willReturn(Optional.of(pizza));
 
@@ -115,14 +156,7 @@ public class PizzaServiceTest {
     @Test
     @DisplayName("Creation")
     public void testCreate() {
-        IPizza pizza = PizzaBuilder
-                .create()
-                .setId(1L)
-                .setName("name")
-                .setDescription("description")
-                .setCreateDate(LocalDateTime.now())
-                .setUpdateDate(LocalDateTime.now())
-                .build();
+        IPizza pizza = PizzaBuilder.create().setId(1L).setName("name").setDescription("description").setCreateDate(LocalDateTime.now()).setUpdateDate(LocalDateTime.now()).build();
 
         given(pizzaStorage.create(any(SystemPizzaDTO.class))).willReturn(pizza);
 
@@ -136,11 +170,7 @@ public class PizzaServiceTest {
     @Test
     @DisplayName("Read all")
     public void testRead() {
-        List<IPizza> pizzas = List.of(
-                PizzaBuilder.create().setId(1L).setName("name1").setDescription("description1").setCreateDate(LocalDateTime.now()).setUpdateDate(LocalDateTime.now()).build(),
-                PizzaBuilder.create().setId(2L).setName("name2").setDescription("description2").setCreateDate(LocalDateTime.now()).setUpdateDate(LocalDateTime.now()).build(),
-                PizzaBuilder.create().setId(3L).setName("name3").setDescription("description3").setCreateDate(LocalDateTime.now()).setUpdateDate(LocalDateTime.now()).build()
-        );
+        List<IPizza> pizzas = List.of(PizzaBuilder.create().setId(1L).setName("name1").setDescription("description1").setCreateDate(LocalDateTime.now()).setUpdateDate(LocalDateTime.now()).build(), PizzaBuilder.create().setId(2L).setName("name2").setDescription("description2").setCreateDate(LocalDateTime.now()).setUpdateDate(LocalDateTime.now()).build(), PizzaBuilder.create().setId(3L).setName("name3").setDescription("description3").setCreateDate(LocalDateTime.now()).setUpdateDate(LocalDateTime.now()).build());
 
         given(pizzaStorage.read()).willReturn(pizzas);
 
@@ -190,13 +220,7 @@ public class PizzaServiceTest {
     @Test
     @DisplayName("Read by id")
     public void testReadById() {
-        IPizza pizza = PizzaBuilder.create()
-                .setId(1L)
-                .setName("name")
-                .setDescription("description")
-                .setCreateDate(LocalDateTime.now())
-                .setUpdateDate(LocalDateTime.now())
-                .build();
+        IPizza pizza = PizzaBuilder.create().setId(1L).setName("name").setDescription("description").setCreateDate(LocalDateTime.now()).setUpdateDate(LocalDateTime.now()).build();
 
         given(pizzaStorage.read(1L)).willReturn(Optional.of(pizza));
 
@@ -218,6 +242,8 @@ public class PizzaServiceTest {
     @Test(expected = ValidationException.class)
     @DisplayName("Null dto updating")
     public void testUpdateByNullDto() {
+        doThrow(ValidationException.class).when(validator).validate(null);
+
         pizzaService.update(1L, null, LocalDateTime.now());
     }
 
@@ -230,49 +256,89 @@ public class PizzaServiceTest {
     @Test(expected = ValidationException.class)
     @DisplayName("Null dto name updating")
     public void testUpdateByDtoWithNullName() {
-        pizzaService.update(1L, new PizzaDTO(null, "description"), LocalDateTime.now());
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName(null);
+        dto.setDescription("description");
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.update(1L, dto, LocalDateTime.now());
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Empty dto name updating")
     public void testUpdateByDtoWithEmptyName() {
-        pizzaService.update(1L, new PizzaDTO("", "description"), LocalDateTime.now());
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName("");
+        dto.setDescription("description");
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.update(1L, dto, LocalDateTime.now());
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Blank dto name updating")
     public void testUpdateByDtoWithBlankName() {
-        pizzaService.update(1L, new PizzaDTO(" ", "description"), LocalDateTime.now());
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName(" ");
+        dto.setDescription("description");
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.update(1L, dto, LocalDateTime.now());
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Null dto description updating")
     public void testUpdateByDtoWithNullDescription() {
-        pizzaService.update(1L, new PizzaDTO("name", null), LocalDateTime.now());
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName("name");
+        dto.setDescription(null);
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.update(1L, dto, LocalDateTime.now());
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Empty dto description updating")
     public void testUpdateByDtoWithEmptyDescription() {
-        pizzaService.update(1L, new PizzaDTO("name", ""), LocalDateTime.now());
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName("name");
+        dto.setDescription("");
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.update(1L, dto, LocalDateTime.now());
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Blank dto description updating")
     public void testUpdateByDtoWithBlankDescription() {
-        pizzaService.update(1L, new PizzaDTO("name", " "), LocalDateTime.now());
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName("name");
+        dto.setDescription(" ");
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.update(1L, dto, LocalDateTime.now());
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Too long dto name updating")
     public void testUpdateByDtoWithTooLongName() {
-        pizzaService.update(1L, new PizzaDTO("name".repeat(100), "description"), LocalDateTime.now());
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName("name".repeat(100));
+        dto.setDescription("description");
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.update(1L, dto, LocalDateTime.now());
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Too long dto description updating")
     public void testUpdateByDtoWithTooLongDescription() {
-        pizzaService.update(1L, new PizzaDTO("name", "description".repeat(100)), LocalDateTime.now());
+        PizzaDTO dto = new PizzaDTO();
+        dto.setName("name");
+        dto.setDescription("description".repeat(100));
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        pizzaService.update(1L, dto, LocalDateTime.now());
     }
 
     @Test(expected = NotFoundException.class)
@@ -286,21 +352,9 @@ public class PizzaServiceTest {
     @Test(expected = NotUniqueException.class)
     @DisplayName("Not unique name updating")
     public void testUpdateNotUniqueName() {
-        IPizza pizza1 = PizzaBuilder.create()
-                .setId(1L)
-                .setName("name1")
-                .setDescription("description1")
-                .setCreateDate(LocalDateTime.now())
-                .setUpdateDate(LocalDateTime.now())
-                .build();
+        IPizza pizza1 = PizzaBuilder.create().setId(1L).setName("name1").setDescription("description1").setCreateDate(LocalDateTime.now()).setUpdateDate(LocalDateTime.now()).build();
 
-        IPizza pizza2 = PizzaBuilder.create()
-                .setId(2L)
-                .setName("name2")
-                .setDescription("description2")
-                .setCreateDate(LocalDateTime.now())
-                .setUpdateDate(LocalDateTime.now())
-                .build();
+        IPizza pizza2 = PizzaBuilder.create().setId(2L).setName("name2").setDescription("description2").setCreateDate(LocalDateTime.now()).setUpdateDate(LocalDateTime.now()).build();
 
         given(pizzaStorage.read(1L)).willReturn(Optional.of(pizza1));
         given(pizzaStorage.read("name2")).willReturn(Optional.of(pizza2));
@@ -313,13 +367,7 @@ public class PizzaServiceTest {
     public void testUpdateWrongVersion() {
         LocalDateTime updateDate = LocalDateTime.now();
 
-        IPizza pizza = PizzaBuilder.create()
-                .setId(1L)
-                .setName("name")
-                .setDescription("description")
-                .setCreateDate(LocalDateTime.now())
-                .setUpdateDate(updateDate)
-                .build();
+        IPizza pizza = PizzaBuilder.create().setId(1L).setName("name").setDescription("description").setCreateDate(LocalDateTime.now()).setUpdateDate(updateDate).build();
 
         given(pizzaStorage.read(1L)).willReturn(Optional.of(pizza));
 
@@ -331,13 +379,7 @@ public class PizzaServiceTest {
     public void testUpdate() {
         LocalDateTime updateDate = LocalDateTime.now();
 
-        IPizza pizza = PizzaBuilder.create()
-                .setId(1L)
-                .setName("name")
-                .setDescription("description")
-                .setCreateDate(LocalDateTime.now())
-                .setUpdateDate(updateDate)
-                .build();
+        IPizza pizza = PizzaBuilder.create().setId(1L).setName("name").setDescription("description").setCreateDate(LocalDateTime.now()).setUpdateDate(updateDate).build();
 
         given(pizzaStorage.read(1L)).willReturn(Optional.of(pizza));
 
@@ -375,13 +417,7 @@ public class PizzaServiceTest {
     public void testDeleteWrongVersion() {
         LocalDateTime updateDate = LocalDateTime.now();
 
-        IPizza pizza = PizzaBuilder.create()
-                .setId(1L)
-                .setName("name")
-                .setDescription("description")
-                .setCreateDate(LocalDateTime.now())
-                .setUpdateDate(updateDate)
-                .build();
+        IPizza pizza = PizzaBuilder.create().setId(1L).setName("name").setDescription("description").setCreateDate(LocalDateTime.now()).setUpdateDate(updateDate).build();
 
         given(pizzaStorage.read(1L)).willReturn(Optional.of(pizza));
 
@@ -393,13 +429,7 @@ public class PizzaServiceTest {
     public void testDelete() {
         LocalDateTime updateDate = LocalDateTime.now();
 
-        IPizza pizza = PizzaBuilder.create()
-                .setId(1L)
-                .setName("name")
-                .setDescription("description")
-                .setCreateDate(LocalDateTime.now())
-                .setUpdateDate(updateDate)
-                .build();
+        IPizza pizza = PizzaBuilder.create().setId(1L).setName("name").setDescription("description").setCreateDate(LocalDateTime.now()).setUpdateDate(updateDate).build();
 
         given(pizzaStorage.read(1L)).willReturn(Optional.of(pizza));
 

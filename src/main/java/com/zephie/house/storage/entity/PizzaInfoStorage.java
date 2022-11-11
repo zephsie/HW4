@@ -3,7 +3,7 @@ package com.zephie.house.storage.entity;
 import com.zephie.house.core.api.IPizzaInfo;
 import com.zephie.house.core.dto.SystemPizzaInfoDTO;
 import com.zephie.house.storage.api.IPizzaInfoStorage;
-import com.zephie.house.util.mappers.ResultSetToPizzaInfoMapper;
+import com.zephie.house.util.mappers.entity.ResultSetToPizzaInfoMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -14,6 +14,8 @@ import java.util.Optional;
 
 public class PizzaInfoStorage implements IPizzaInfoStorage {
     private final DataSource dataSource;
+
+    private final ResultSetToPizzaInfoMapper resultSetToPizzaInfoMapper;
 
     private static final String INSERT = "INSERT INTO structure.pizza_info (pizza_id, size, dt_create, dt_update) VALUES (?, ?, ?, ?)";
 
@@ -32,8 +34,9 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
 
     private static final String IS_EXIST = "SELECT EXISTS(SELECT 1 FROM structure.pizza_info WHERE id = ?)";
 
-    public PizzaInfoStorage(DataSource dataSource) {
+    public PizzaInfoStorage(DataSource dataSource, ResultSetToPizzaInfoMapper resultSetToPizzaInfoMapper) {
         this.dataSource = dataSource;
+        this.resultSetToPizzaInfoMapper = resultSetToPizzaInfoMapper;
     }
 
     @Override
@@ -66,7 +69,7 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
             preparedStatement.setLong(1, id);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                return resultSet.next() ? Optional.of(ResultSetToPizzaInfoMapper.fullMap(resultSet)) : Optional.empty();
+                return resultSet.next() ? Optional.of(resultSetToPizzaInfoMapper.fullMap(resultSet)) : Optional.empty();
             }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading PizzaInfo");
@@ -81,7 +84,7 @@ public class PizzaInfoStorage implements IPizzaInfoStorage {
                 Collection<IPizzaInfo> pizzaInfos = new HashSet<>();
 
                 while (resultSet.next()) {
-                    pizzaInfos.add(ResultSetToPizzaInfoMapper.partialMap(resultSet));
+                    pizzaInfos.add(resultSetToPizzaInfoMapper.partialMap(resultSet));
                 }
 
                 return pizzaInfos;

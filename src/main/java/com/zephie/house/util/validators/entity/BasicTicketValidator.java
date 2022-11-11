@@ -1,13 +1,15 @@
-package com.zephie.house.util.validators;
+package com.zephie.house.util.validators.entity;
 
 import com.zephie.house.core.dto.TicketDTO;
 import com.zephie.house.util.exceptions.ValidationException;
+import com.zephie.house.util.validators.api.IValidator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BasicTicketValidator {
-    public static void validate(TicketDTO ticketDTO) {
+public class BasicTicketValidator implements IValidator<TicketDTO> {
+    @Override
+    public void validate(TicketDTO ticketDTO) {
         List<String> errors = new ArrayList<>();
 
         if (ticketDTO == null) {

@@ -4,7 +4,7 @@ import com.zephie.house.core.api.IMenu;
 import com.zephie.house.core.api.IMenuRow;
 import com.zephie.house.core.dto.SystemMenuDTO;
 import com.zephie.house.storage.api.IMenuStorage;
-import com.zephie.house.util.mappers.ResultSetToMenuMapper;
+import com.zephie.house.util.mappers.entity.ResultSetToMenuMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -33,8 +33,11 @@ public class MenuStorage implements IMenuStorage {
 
     private final DataSource dataSource;
 
-    public MenuStorage(DataSource dataSource) {
+    private final ResultSetToMenuMapper menuMapper;
+
+    public MenuStorage(DataSource dataSource, ResultSetToMenuMapper menuMapper) {
         this.dataSource = dataSource;
+        this.menuMapper = menuMapper;
     }
 
     @Override
@@ -70,14 +73,14 @@ public class MenuStorage implements IMenuStorage {
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    IMenu menu = ResultSetToMenuMapper.fullMap(resultSet);
+                    IMenu menu = menuMapper.fullMap(resultSet);
                     Set<IMenuRow> menuRows = new HashSet<>();
 
                     try (PreparedStatement statementToGetMenuRows = connection.prepareStatement(SELECT_MENU_ROWS_BY_MENU_ID)) {
                         statementToGetMenuRows.setLong(1, id);
                         try (ResultSet resultSetToGetMenuRows = statementToGetMenuRows.executeQuery()) {
                             while (resultSetToGetMenuRows.next()) {
-                                menuRows.add(ResultSetToMenuMapper.fullMapRow(resultSetToGetMenuRows));
+                                menuRows.add(menuMapper.fullMapRow(resultSetToGetMenuRows));
                             }
                         }
                     } catch (SQLException e) {
@@ -104,7 +107,7 @@ public class MenuStorage implements IMenuStorage {
                 Collection<IMenu> menuCollection = new HashSet<>();
 
                 while (resultSet.next()) {
-                    menuCollection.add(ResultSetToMenuMapper.partialMap(resultSet));
+                    menuCollection.add(menuMapper.partialMap(resultSet));
                 }
 
                 return menuCollection;
@@ -175,7 +178,7 @@ public class MenuStorage implements IMenuStorage {
             preparedStatement.setString(1, name);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                return resultSet.next() ? Optional.of(ResultSetToMenuMapper.fullMap(resultSet)) : Optional.empty();
+                return resultSet.next() ? Optional.of(menuMapper.fullMap(resultSet)) : Optional.empty();
             }
         } catch (SQLException e) {
             throw new RuntimeException("Something went wrong while reading Menu");

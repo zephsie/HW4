@@ -4,6 +4,7 @@ import com.zephie.house.services.api.ITicketService;
 import com.zephie.house.services.entity.TicketService;
 import com.zephie.house.storage.singleton.OrderStorageSingleton;
 import com.zephie.house.storage.singleton.TicketStorageSingleton;
+import com.zephie.house.util.validators.singleton.BasicTicketValidatorSingleton;
 
 public class TicketServiceSingleton {
     private static volatile TicketServiceSingleton instance;
@@ -11,7 +12,7 @@ public class TicketServiceSingleton {
     private final ITicketService ticketService;
 
     private TicketServiceSingleton() {
-        ticketService = new TicketService(TicketStorageSingleton.getInstance(), OrderStorageSingleton.getInstance());
+        ticketService = new TicketService(TicketStorageSingleton.getInstance(), OrderStorageSingleton.getInstance(), BasicTicketValidatorSingleton.getInstance());
     }
 
     public static ITicketService getInstance() {

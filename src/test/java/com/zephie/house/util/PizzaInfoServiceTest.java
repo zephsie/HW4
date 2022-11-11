@@ -13,6 +13,7 @@ import com.zephie.house.util.exceptions.FKNotFound;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.ValidationException;
 import com.zephie.house.util.exceptions.WrongVersionException;
+import com.zephie.house.util.validators.api.IValidator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +33,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +44,9 @@ public class PizzaInfoServiceTest {
 
     @Mock
     private IPizzaStorage pizzaStorage;
+
+    @Mock
+    private IValidator<PizzaInfoDTO> validator;
 
     @InjectMocks
     private PizzaInfoService service;
@@ -54,25 +59,44 @@ public class PizzaInfoServiceTest {
     @Test(expected = ValidationException.class)
     @DisplayName("Null dto creation")
     public void testNullDtoCreation() {
+        doThrow(ValidationException.class).when(validator).validate(null);
+
         service.create(null);
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Null pizza id creation")
     public void testNullPizzaIdCreation() {
-        service.create(new PizzaInfoDTO(null, 1));
+        PizzaInfoDTO dto = new PizzaInfoDTO();
+        dto.setPizzaId(null);
+
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        service.create(dto);
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Negative size creation")
     public void testNegativeSizeCreation() {
-        service.create(new PizzaInfoDTO(1L, -1));
+        PizzaInfoDTO dto = new PizzaInfoDTO();
+        dto.setPizzaId(1L);
+        dto.setSize(-1);
+
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        service.create(dto);
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Zero size creation")
     public void testZeroSizeCreation() {
-        service.create(new PizzaInfoDTO(1L, 0));
+        PizzaInfoDTO dto = new PizzaInfoDTO();
+        dto.setPizzaId(1L);
+        dto.setSize(0);
+
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        service.create(dto);
     }
 
     @Test(expected = FKNotFound.class)
@@ -219,6 +243,8 @@ public class PizzaInfoServiceTest {
     @Test(expected = ValidationException.class)
     @DisplayName("Null dto updating")
     public void testNullDtoUpdating() {
+        doThrow(ValidationException.class).when(validator).validate(null);
+
         service.update(1L, null, LocalDateTime.now());
     }
 
@@ -231,19 +257,37 @@ public class PizzaInfoServiceTest {
     @Test(expected = ValidationException.class)
     @DisplayName("Null pizza id updating")
     public void testNullPizzaIdUpdating() {
-        service.update(1L, new PizzaInfoDTO(null, 1), LocalDateTime.now());
+        PizzaInfoDTO dto = new PizzaInfoDTO();
+        dto.setPizzaId(null);
+        dto.setSize(1);
+
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        service.update(1L, dto, LocalDateTime.now());
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Negative size updating")
     public void testNegativeSizeUpdating() {
-        service.update(1L, new PizzaInfoDTO(1L, -1), LocalDateTime.now());
+        PizzaInfoDTO dto = new PizzaInfoDTO();
+        dto.setPizzaId(1L);
+        dto.setSize(-1);
+
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        service.update(1L, dto, LocalDateTime.now());
     }
 
     @Test(expected = ValidationException.class)
     @DisplayName("Zero size updating")
     public void testZeroSizeUpdating() {
-        service.update(1L, new PizzaInfoDTO(1L, 0), LocalDateTime.now());
+        PizzaInfoDTO dto = new PizzaInfoDTO();
+        dto.setPizzaId(1L);
+        dto.setSize(0);
+
+        doThrow(ValidationException.class).when(validator).validate(dto);
+
+        service.update(1L, dto, LocalDateTime.now());
     }
 
     @Test(expected = NotFoundException.class)

@@ -3,6 +3,7 @@ package com.zephie.house.storage.singleton;
 import com.zephie.house.storage.api.ITicketStorage;
 import com.zephie.house.storage.entity.TicketStorage;
 import com.zephie.house.util.db.DataSourceInitializer;
+import com.zephie.house.util.mappers.singleton.ResultSetToTicketMapperSingleton;
 
 public class TicketStorageSingleton {
     private static volatile TicketStorageSingleton instance;
@@ -10,7 +11,7 @@ public class TicketStorageSingleton {
     private final ITicketStorage ticketStorage;
 
     private TicketStorageSingleton() {
-        this.ticketStorage = new TicketStorage(DataSourceInitializer.getDataSource());
+        this.ticketStorage = new TicketStorage(DataSourceInitializer.getDataSource(), ResultSetToTicketMapperSingleton.getInstance());
     }
 
     public static ITicketStorage getInstance() {

@@ -1,12 +1,14 @@
-package com.zephie.house.util.validators;
+package com.zephie.house.util.validators.entity;
 
 import com.zephie.house.core.dto.MenuRowDTO;
+import com.zephie.house.util.validators.api.IValidator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BasicMenuRowValidator {
-    public static void validate(MenuRowDTO menuRowDTO) {
+public class BasicMenuRowValidator implements IValidator<MenuRowDTO> {
+    @Override
+    public void validate(MenuRowDTO menuRowDTO) {
         List<String> errors = new ArrayList<>();
 
         if (menuRowDTO == null) {

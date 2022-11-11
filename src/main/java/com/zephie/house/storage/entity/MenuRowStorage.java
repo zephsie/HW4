@@ -3,7 +3,7 @@ package com.zephie.house.storage.entity;
 import com.zephie.house.core.api.IMenuRow;
 import com.zephie.house.core.dto.SystemMenuRowDTO;
 import com.zephie.house.storage.api.IMenuRowStorage;
-import com.zephie.house.util.mappers.ResultSetToMenuRowMapper;
+import com.zephie.house.util.mappers.entity.ResultSetToMenuRowMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -14,6 +14,8 @@ import java.util.Optional;
 
 public class MenuRowStorage implements IMenuRowStorage {
     private final DataSource dataSource;
+
+    private final ResultSetToMenuRowMapper resultSetToMenuRowMapper;
 
     private static final String SELECT = "SELECT menu_row.id menu_row_id, pizza_info_id, pizza_id, pizza.name pizza_name, size pizza_info_size, menu_id, menu.name menu_name, price menu_row_price\n" +
             "\tFROM structure.menu_row\n" +
@@ -38,8 +40,9 @@ public class MenuRowStorage implements IMenuRowStorage {
 
     private static final String CHECK_IF_EXISTS_AND_ACTIVE = "SELECT EXISTS(SELECT 1 FROM structure.menu_row JOIN structure.menu ON menu_id = menu.id WHERE menu_row.id = ? AND menu.enable = true)";
 
-    public MenuRowStorage(DataSource dataSource) {
+    public MenuRowStorage(DataSource dataSource, ResultSetToMenuRowMapper resultSetToMenuRowMapper) {
         this.dataSource = dataSource;
+        this.resultSetToMenuRowMapper = resultSetToMenuRowMapper;
     }
 
     @Override
@@ -75,7 +78,7 @@ public class MenuRowStorage implements IMenuRowStorage {
             preparedStatement.setLong(1, id);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                return resultSet.next() ? Optional.of(ResultSetToMenuRowMapper.fullMap(resultSet)) : Optional.empty();
+                return resultSet.next() ? Optional.of(resultSetToMenuRowMapper.fullMap(resultSet)) : Optional.empty();
             }
         } catch (Exception e) {
             throw new RuntimeException("Something went wrong while reading MenuRow)");
@@ -89,7 +92,7 @@ public class MenuRowStorage implements IMenuRowStorage {
                 Collection<IMenuRow> menuRows = new HashSet<>();
 
                 while (resultSet.next()) {
-                    menuRows.add(ResultSetToMenuRowMapper.partialMap(resultSet));
+                    menuRows.add(resultSetToMenuRowMapper.partialMap(resultSet));
                 }
 
                 return menuRows;

@@ -8,7 +8,7 @@ import com.zephie.house.storage.api.IStageStorage;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.NotUniqueException;
 import com.zephie.house.util.exceptions.WrongVersionException;
-import com.zephie.house.util.validators.BasicStageValidator;
+import com.zephie.house.util.validators.api.IValidator;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -17,13 +17,16 @@ import java.util.Optional;
 public class StageService implements IStageService {
     private final IStageStorage storage;
 
-    public StageService(IStageStorage storage) {
+    private final IValidator<StageDTO> validator;
+
+    public StageService(IStageStorage storage, IValidator<StageDTO> validator) {
         this.storage = storage;
+        this.validator = validator;
     }
 
     @Override
     public IStage create(StageDTO stageDTO) {
-        BasicStageValidator.validate(stageDTO);
+        validator.validate(stageDTO);
 
         if (storage.read(stageDTO.getDescription()).isPresent()) {
             throw new NotUniqueException("Stage with description " + stageDTO.getDescription() + " already exists");
@@ -58,7 +61,7 @@ public class StageService implements IStageService {
             throw new IllegalArgumentException("Date update cannot be null");
         }
 
-        BasicStageValidator.validate(stageDTO);
+        validator.validate(stageDTO);
 
         Optional<IStage> stage = storage.read(id);
 

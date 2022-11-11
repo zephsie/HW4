@@ -3,6 +3,7 @@ package com.zephie.house.services.singleton;
 import com.zephie.house.services.api.IMenuService;
 import com.zephie.house.services.entity.MenuService;
 import com.zephie.house.storage.singleton.MenuStorageSingleton;
+import com.zephie.house.util.validators.singleton.BasicMenuValidatorSingleton;
 
 public class MenuServiceSingleton {
     private static volatile MenuServiceSingleton instance;
@@ -10,7 +11,7 @@ public class MenuServiceSingleton {
     private final IMenuService menuService;
 
     private MenuServiceSingleton() {
-        menuService = new MenuService(MenuStorageSingleton.getInstance());
+        menuService = new MenuService(MenuStorageSingleton.getInstance(), BasicMenuValidatorSingleton.getInstance());
     }
 
     public static IMenuService getInstance() {

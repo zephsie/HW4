@@ -1,11 +1,13 @@
-package com.zephie.house.util.validators;
+package com.zephie.house.util.validators.entity;
 
 import com.zephie.house.core.dto.StageStatusDTO;
+import com.zephie.house.util.validators.api.IValidator;
 
 import java.util.ArrayList;
 
-public class BasicStageStatusValidator {
-    public static void validate(StageStatusDTO stageStatusDTO) {
+public class BasicStageStatusValidator implements IValidator<StageStatusDTO> {
+    @Override
+    public void validate(StageStatusDTO stageStatusDTO) {
         ArrayList<String> errors = new ArrayList<>();
 
         if (stageStatusDTO == null) {

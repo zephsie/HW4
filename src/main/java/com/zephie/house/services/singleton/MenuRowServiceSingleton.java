@@ -5,6 +5,7 @@ import com.zephie.house.services.entity.MenuRowService;
 import com.zephie.house.storage.singleton.MenuRowStorageSingleton;
 import com.zephie.house.storage.singleton.MenuStorageSingleton;
 import com.zephie.house.storage.singleton.PizzaInfoStorageSingleton;
+import com.zephie.house.util.validators.singleton.BasicMenuRowValidatorSingleton;
 
 public class MenuRowServiceSingleton {
     private static volatile MenuRowServiceSingleton instance;
@@ -12,7 +13,7 @@ public class MenuRowServiceSingleton {
     private final IMenuRowService menuRowService;
 
     private MenuRowServiceSingleton() {
-        menuRowService = new MenuRowService(MenuRowStorageSingleton.getInstance(), PizzaInfoStorageSingleton.getInstance(), MenuStorageSingleton.getInstance());
+        menuRowService = new MenuRowService(MenuRowStorageSingleton.getInstance(), PizzaInfoStorageSingleton.getInstance(), MenuStorageSingleton.getInstance(), BasicMenuRowValidatorSingleton.getInstance());
     }
 
     public static IMenuRowService getInstance() {

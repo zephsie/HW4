@@ -5,8 +5,8 @@ import com.zephie.house.core.api.IStageStatus;
 import com.zephie.house.core.dto.SystemOrderStatusDTO;
 import com.zephie.house.core.dto.SystemStageStatusDTO;
 import com.zephie.house.storage.api.IOrderStatusStorage;
-import com.zephie.house.util.mappers.ResultSetToOrderStatusMapper;
-import com.zephie.house.util.mappers.ResultSetToStageStatusMapper;
+import com.zephie.house.util.mappers.entity.ResultSetToOrderStatusMapper;
+import com.zephie.house.util.mappers.entity.ResultSetToStageStatusMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -15,8 +15,14 @@ import java.util.*;
 public class OrderStatusStorage implements IOrderStatusStorage {
     private final DataSource dataSource;
 
-    public OrderStatusStorage(DataSource dataSource) {
+    private final ResultSetToOrderStatusMapper orderStatusMapper;
+
+    private final ResultSetToStageStatusMapper stageStatusMapper;
+
+    public OrderStatusStorage(DataSource dataSource, ResultSetToOrderStatusMapper orderStatusMapper, ResultSetToStageStatusMapper stageStatusMapper) {
         this.dataSource = dataSource;
+        this.orderStatusMapper = orderStatusMapper;
+        this.stageStatusMapper = stageStatusMapper;
     }
 
     private static final String SELECT_ORDER_STATUS_BY_ID = "SELECT order_status.id order_status_id, ticket_id, ticket_number, order_status.dt_create\n" +
@@ -77,14 +83,14 @@ public class OrderStatusStorage implements IOrderStatusStorage {
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    IOrderStatus orderStatus = ResultSetToOrderStatusMapper.fullMap(resultSet);
+                    IOrderStatus orderStatus = orderStatusMapper.fullMap(resultSet);
                     Set<IStageStatus> stageStatuses = new HashSet<>();
 
                     try (PreparedStatement statementToGetStatuses = connection.prepareStatement(SELECT_STAGE_STATUS_BY_ORDER_STATUS_ID)) {
                         statementToGetStatuses.setLong(1, id);
                         try (ResultSet rs = statementToGetStatuses.executeQuery()) {
                             while (rs.next()) {
-                                stageStatuses.add(ResultSetToStageStatusMapper.fullMap(rs));
+                                stageStatuses.add(stageStatusMapper.fullMap(rs));
                             }
                         }
                     }
@@ -108,8 +114,8 @@ public class OrderStatusStorage implements IOrderStatusStorage {
                 Map<Long, IOrderStatus> orderStatuses = new HashMap<>();
 
                 while (resultSet.next()) {
-                    IOrderStatus orderStatus = ResultSetToOrderStatusMapper.partialMap(resultSet);
-                    IStageStatus stageStatus = ResultSetToStageStatusMapper.fullMap(resultSet);
+                    IOrderStatus orderStatus = orderStatusMapper.partialMap(resultSet);
+                    IStageStatus stageStatus = stageStatusMapper.fullMap(resultSet);
 
                     orderStatuses.computeIfAbsent(orderStatus.getId(), k -> orderStatus).setHistory(new HashSet<>(Collections.singletonList(stageStatus)));
                 }

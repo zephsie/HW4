@@ -12,8 +12,7 @@ import com.zephie.house.storage.api.ITicketStorage;
 import com.zephie.house.util.exceptions.FKNotFound;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.NotUniqueException;
-import com.zephie.house.util.validators.BasicOrderStatusValidator;
-import com.zephie.house.util.validators.BasicStageStatusValidator;
+import com.zephie.house.util.validators.api.IValidator;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -27,15 +26,21 @@ public class OrderStatusService implements IOrderStatusService {
 
     private final IStageStorage stageStorage;
 
-    public OrderStatusService(IOrderStatusStorage orderStatusStorage, ITicketStorage ticketStorage, IStageStorage stageStorage) {
+    private final IValidator<OrderStatusDTO> validator;
+
+    private final IValidator<StageStatusDTO> stageStatusValidator;
+
+    public OrderStatusService(IOrderStatusStorage orderStatusStorage, ITicketStorage ticketStorage, IStageStorage stageStorage, IValidator<OrderStatusDTO> validator, IValidator<StageStatusDTO> stageStatusValidator) {
         this.orderStatusStorage = orderStatusStorage;
         this.ticketStorage = ticketStorage;
         this.stageStorage = stageStorage;
+        this.validator = validator;
+        this.stageStatusValidator = stageStatusValidator;
     }
 
     @Override
     public IOrderStatus create(OrderStatusDTO orderStatusDTO) {
-        BasicOrderStatusValidator.validate(orderStatusDTO);
+        validator.validate(orderStatusDTO);
 
         if (!ticketStorage.isPresent(orderStatusDTO.getTicketId())) {
             throw new FKNotFound("Ticket with id " + orderStatusDTO.getTicketId() + " does not exist");
@@ -80,7 +85,7 @@ public class OrderStatusService implements IOrderStatusService {
 
     @Override
     public IOrderStatus addStage(StageStatusDTO StageStatusDTO) {
-        BasicStageStatusValidator.validate(StageStatusDTO);
+        stageStatusValidator.validate(StageStatusDTO);
 
         if (!orderStatusStorage.isPresent(StageStatusDTO.getOrderStatusId())) {
             throw new FKNotFound("OrderStatus with id " + StageStatusDTO.getOrderStatusId() + " does not exist");

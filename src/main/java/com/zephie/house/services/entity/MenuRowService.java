@@ -10,7 +10,7 @@ import com.zephie.house.storage.api.IPizzaInfoStorage;
 import com.zephie.house.util.exceptions.FKNotFound;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.WrongVersionException;
-import com.zephie.house.util.validators.BasicMenuRowValidator;
+import com.zephie.house.util.validators.api.IValidator;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -24,15 +24,18 @@ public class MenuRowService implements IMenuRowService {
 
     private final IMenuStorage menuStorage;
 
-    public MenuRowService(IMenuRowStorage menuRowStorage, IPizzaInfoStorage pizzaInfoStorage, IMenuStorage menuStorage) {
+    private final IValidator<MenuRowDTO> validator;
+
+    public MenuRowService(IMenuRowStorage menuRowStorage, IPizzaInfoStorage pizzaInfoStorage, IMenuStorage menuStorage, IValidator<MenuRowDTO> validator) {
         this.menuRowStorage = menuRowStorage;
         this.pizzaInfoStorage = pizzaInfoStorage;
         this.menuStorage = menuStorage;
+        this.validator = validator;
     }
 
     @Override
     public IMenuRow create(MenuRowDTO menuRowDTO) {
-        BasicMenuRowValidator.validate(menuRowDTO);
+        validator.validate(menuRowDTO);
 
         if (!pizzaInfoStorage.isPresent(menuRowDTO.getPizzaInfoId())) {
             throw new FKNotFound("PizzaInfo with id " + menuRowDTO.getPizzaInfoId() + " not found");
@@ -65,7 +68,7 @@ public class MenuRowService implements IMenuRowService {
 
     @Override
     public IMenuRow update(Long id, MenuRowDTO menuRowDTO, LocalDateTime dateUpdate) {
-        BasicMenuRowValidator.validate(menuRowDTO);
+        validator.validate(menuRowDTO);
 
         if (id == null) {
             throw new IllegalArgumentException("Id cannot be null");

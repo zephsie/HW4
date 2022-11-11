@@ -1,4 +1,4 @@
-package com.zephie.house.util.mappers;
+package com.zephie.house.util.mappers.entity;
 
 import com.zephie.house.core.api.IOrderStatus;
 import com.zephie.house.core.builders.OrderStatusBuilder;
@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ResultSetToOrderStatusMapper {
-    public static IOrderStatus partialMap(ResultSet resultSet) throws SQLException {
+    public IOrderStatus partialMap(ResultSet resultSet) throws SQLException {
         return OrderStatusBuilder.create()
                 .setId(resultSet.getLong("order_status_id"))
                 .setTicket(TicketBuilder.create()
@@ -18,7 +18,7 @@ public class ResultSetToOrderStatusMapper {
                 .build();
     }
 
-    public static IOrderStatus fullMap(ResultSet resultSet) throws SQLException {
+    public IOrderStatus fullMap(ResultSet resultSet) throws SQLException {
         return OrderStatusBuilder.create()
                 .setId(resultSet.getLong("order_status_id"))
                 .setTicket(TicketBuilder.create()

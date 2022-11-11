@@ -1,4 +1,4 @@
-package com.zephie.house.util.mappers;
+package com.zephie.house.util.mappers.entity;
 
 import com.zephie.house.core.api.IPizza;
 import com.zephie.house.core.builders.PizzaBuilder;
@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ResultSetToPizzaMapper {
-    public static IPizza fullMap(ResultSet resultSet) throws SQLException {
+    public IPizza fullMap(ResultSet resultSet) throws SQLException {
         return PizzaBuilder.create()
                 .setId(resultSet.getLong("pizza_id"))
                 .setName(resultSet.getString("pizza_name"))
@@ -17,7 +17,7 @@ public class ResultSetToPizzaMapper {
                 .build();
     }
 
-    public static IPizza partialMap(ResultSet resultSet) throws SQLException {
+    public IPizza partialMap(ResultSet resultSet) throws SQLException {
         return PizzaBuilder.create()
                 .setId(resultSet.getLong("pizza_id"))
                 .setName(resultSet.getString("pizza_name"))

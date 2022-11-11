@@ -1,13 +1,15 @@
-package com.zephie.house.util.validators;
+package com.zephie.house.util.validators.entity;
 
 import com.zephie.house.core.dto.PizzaInfoDTO;
 import com.zephie.house.util.exceptions.ValidationException;
+import com.zephie.house.util.validators.api.IValidator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BasicPizzaInfoValidator {
-    public static void validate(PizzaInfoDTO pizzaInfoDTO) {
+public class BasicPizzaInfoValidator implements IValidator<PizzaInfoDTO> {
+    @Override
+    public void validate(PizzaInfoDTO pizzaInfoDTO) {
         List<String> errors = new ArrayList<>();
 
         if (pizzaInfoDTO == null) {

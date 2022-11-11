@@ -1,13 +1,15 @@
-package com.zephie.house.util.validators;
+package com.zephie.house.util.validators.entity;
 
 import com.zephie.house.core.dto.OrderDTO;
 import com.zephie.house.util.exceptions.ValidationException;
+import com.zephie.house.util.validators.api.IValidator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BasicOrderValidator {
-    public static void validate(OrderDTO orderDTO) {
+public class BasicOrderValidator implements IValidator<OrderDTO> {
+    @Override
+    public void validate(OrderDTO orderDTO) {
         List<String> errors = new ArrayList<>();
 
         if (orderDTO == null) {

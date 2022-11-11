@@ -5,8 +5,8 @@ import com.zephie.house.core.api.ISelectedItem;
 import com.zephie.house.core.dto.SystemOrderDTO;
 import com.zephie.house.core.dto.SystemSelectedItemDTO;
 import com.zephie.house.storage.api.IOrderStorage;
-import com.zephie.house.util.mappers.ResultSetToOrderMapper;
-import com.zephie.house.util.mappers.ResultSetToSelectedItemMapper;
+import com.zephie.house.util.mappers.entity.ResultSetToOrderMapper;
+import com.zephie.house.util.mappers.entity.ResultSetToSelectedItemMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -15,8 +15,14 @@ import java.util.*;
 public class OrderStorage implements IOrderStorage {
     private final DataSource dataSource;
 
-    public OrderStorage(DataSource dataSource) {
+    private final ResultSetToOrderMapper orderMapper;
+
+    private final ResultSetToSelectedItemMapper selectedItemMapper;
+
+    public OrderStorage(DataSource dataSource, ResultSetToOrderMapper orderMapper, ResultSetToSelectedItemMapper selectedItemMapper) {
         this.dataSource = dataSource;
+        this.orderMapper = orderMapper;
+        this.selectedItemMapper = selectedItemMapper;
     }
 
     private static final String INSERT_ORDER = "INSERT INTO structure.order_table (dt_create) VALUES (?)";
@@ -89,14 +95,14 @@ public class OrderStorage implements IOrderStorage {
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    IOrder order = ResultSetToOrderMapper.fullMap(resultSet);
+                    IOrder order = orderMapper.fullMap(resultSet);
                     Set<ISelectedItem> selectedItems = new HashSet<>();
 
                     try (PreparedStatement statementToGetMenuRows = connection.prepareStatement(SELECT_SELECTED_ITEM_BY_ORDER_ID)) {
                         statementToGetMenuRows.setLong(1, id);
                         try (ResultSet resultSetToGetSelectedItems = statementToGetMenuRows.executeQuery()) {
                             while (resultSetToGetSelectedItems.next()) {
-                                selectedItems.add(ResultSetToSelectedItemMapper.partialMap(resultSetToGetSelectedItems));
+                                selectedItems.add(selectedItemMapper.partialMap(resultSetToGetSelectedItems));
                             }
                         }
                     }
@@ -120,8 +126,8 @@ public class OrderStorage implements IOrderStorage {
                 Map<Long, IOrder> orders = new HashMap<>();
 
                 while (resultSet.next()) {
-                    IOrder order = ResultSetToOrderMapper.partialMap(resultSet);
-                    ISelectedItem selectedItem = ResultSetToSelectedItemMapper.partialMap(resultSet);
+                    IOrder order = orderMapper.partialMap(resultSet);
+                    ISelectedItem selectedItem = selectedItemMapper.partialMap(resultSet);
 
                     orders.computeIfAbsent(order.getId(), k -> order).setItems(new HashSet<>(Collections.singletonList(selectedItem)));
                 }

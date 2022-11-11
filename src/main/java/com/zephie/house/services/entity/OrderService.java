@@ -9,23 +9,29 @@ import com.zephie.house.storage.api.IMenuRowStorage;
 import com.zephie.house.storage.api.IOrderStorage;
 import com.zephie.house.util.exceptions.FKNotFound;
 import com.zephie.house.util.exceptions.NotFoundException;
-import com.zephie.house.util.validators.BasicOrderValidator;
+import com.zephie.house.util.validators.api.IValidator;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class OrderService implements IOrderService {
     private final IOrderStorage storage;
     private final IMenuRowStorage menuRowStorage;
 
-    public OrderService(IOrderStorage storage, IMenuRowStorage menuRowStorage) {
+    private final IValidator<OrderDTO> validator;
+
+    public OrderService(IOrderStorage storage, IMenuRowStorage menuRowStorage, IValidator<OrderDTO> validator) {
         this.storage = storage;
         this.menuRowStorage = menuRowStorage;
+        this.validator = validator;
     }
 
     @Override
     public IOrder create(OrderDTO orderDTO) {
-        BasicOrderValidator.validate(orderDTO);
+        validator.validate(orderDTO);
 
         orderDTO.getItems().forEach(item -> {
             if (!menuRowStorage.isAvailable(item.getMenuRowId())) {

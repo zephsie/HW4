@@ -9,7 +9,7 @@ import com.zephie.house.storage.api.ITicketStorage;
 import com.zephie.house.util.exceptions.FKNotFound;
 import com.zephie.house.util.exceptions.NotFoundException;
 import com.zephie.house.util.exceptions.NotUniqueException;
-import com.zephie.house.util.validators.BasicTicketValidator;
+import com.zephie.house.util.validators.api.IValidator;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -20,14 +20,17 @@ public class TicketService implements ITicketService {
 
     private final IOrderStorage orderStorage;
 
-    public TicketService(ITicketStorage ticketStorage, IOrderStorage orderStorage) {
+    private final IValidator<TicketDTO> validator;
+
+    public TicketService(ITicketStorage ticketStorage, IOrderStorage orderStorage, IValidator<TicketDTO> validator) {
         this.ticketStorage = ticketStorage;
         this.orderStorage = orderStorage;
+        this.validator = validator;
     }
 
     @Override
     public ITicket create(TicketDTO ticketDTO) {
-        BasicTicketValidator.validate(ticketDTO);
+        validator.validate(ticketDTO);
 
         if (!orderStorage.isPresent(ticketDTO.getOrderId())) {
             throw new FKNotFound("Order with id " + ticketDTO.getOrderId() + " not found");
