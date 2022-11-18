@@ -17,14 +17,10 @@ public class SelectedItemServlet extends HttpServlet {
 
     private final ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
 
-    private final String CHARSET = "UTF-8";
-
     private final String CONTENT_TYPE = "application/json";
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        req.setCharacterEncoding(CHARSET);
-        resp.setCharacterEncoding(CHARSET);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         resp.setContentType(CONTENT_TYPE);
 
         String stringId = req.getParameter("id");

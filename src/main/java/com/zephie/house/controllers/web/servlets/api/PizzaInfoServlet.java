@@ -24,14 +24,10 @@ public class PizzaInfoServlet extends HttpServlet {
 
     private final ObjectMapper mapper = ObjectMapperFactory.getObjectMapper();
 
-    private final String CHARSET = "UTF-8";
-
     private final String CONTENT_TYPE = "application/json";
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        req.setCharacterEncoding(CHARSET);
-        resp.setCharacterEncoding(CHARSET);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         resp.setContentType(CONTENT_TYPE);
 
         String stringId = req.getParameter("id");
@@ -69,9 +65,7 @@ public class PizzaInfoServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        req.setCharacterEncoding(CHARSET);
-        resp.setCharacterEncoding(CHARSET);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
         resp.setContentType(CONTENT_TYPE);
 
         PizzaInfoDTO pizzaInfoDTO;
@@ -95,9 +89,7 @@ public class PizzaInfoServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        req.setCharacterEncoding(CHARSET);
-        resp.setCharacterEncoding(CHARSET);
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
         resp.setContentType(CONTENT_TYPE);
 
         String stringId = req.getParameter("id");
@@ -132,10 +124,7 @@ public class PizzaInfoServlet extends HttpServlet {
     }
 
     @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        req.setCharacterEncoding(CHARSET);
-        resp.setCharacterEncoding(CHARSET);
-
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
         String stringId = req.getParameter("id");
         String version = req.getParameter("version");
 
