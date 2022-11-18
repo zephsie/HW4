@@ -1,10 +1,10 @@
 package com.zephie.house.controllers.web.filters;
 
 import javax.servlet.*;
-import javax.servlet.annotation.WebServlet;
+import javax.servlet.annotation.WebFilter;
 import java.io.IOException;
 
-@WebServlet(name = "CharsetFilter", urlPatterns = "/*")
+@WebFilter(filterName = "CharsetFilter", urlPatterns = "/*")
 public class CharsetFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
